@@ -1,32 +1,21 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package joaquinbarreram1;
 
-/**
- *
- * @author jabar
- */
 public class Lodging {
     int numberOfBedrooms;
     double basePricePerNight;
-    String description;
- 
     int maxOccupants;
+    
     // Default Cnstructor
     public Lodging (){
         this.numberOfBedrooms = 0;
         this.basePricePerNight = 0.00;
-        this.description = null;
         this.maxOccupants = 0;
     }
     
     // Parameter constructor
-    public Lodging (int inNumberOfBedrooms, double inBasePricePerNight, String inDescription, int inMaxOccupants){
+    public Lodging (int inNumberOfBedrooms, double inBasePricePerNight,int inMaxOccupants){
         this.numberOfBedrooms = inNumberOfBedrooms;
         this.basePricePerNight = inBasePricePerNight;
-        this.description = inDescription; 
         this.maxOccupants = inMaxOccupants;
     }
     
@@ -35,8 +24,7 @@ public class Lodging {
     public String toString(){
         return "Lodging info \n" + 
                 "Number Of Bedrooms: " + this.numberOfBedrooms +
-                "\nBase price per night: " + this.basePricePerNight +
-                "\nDescription: " + this.description +
+                "\nBase price per night: " + String.format("%.2f", this.basePricePerNight) +
                 "\nMax occupants: " + this.maxOccupants;
     }
     

@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package joaquinbarreram1;
 
-/**
- *
- * @author jabar
- */
 public class LodgingReview {
     String comments = null;
     String date = null;
@@ -28,9 +20,12 @@ public class LodgingReview {
 
     }
     
-    // Overide
+    // Override
     @Override
     public String toString(){
-        return "\nLodging Review: ";
+        return "\nLodging Review: " + this.comments +
+                "\nrating: " + this.rating +
+                "\nDate: " + this.date;
+        
     }
 }

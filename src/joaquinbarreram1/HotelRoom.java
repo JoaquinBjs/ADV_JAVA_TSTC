@@ -1,24 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package joaquinbarreram1;
 
-/**
- *
- * @author jabar
- */
-public class HotelRoom extends Lodging {
+public class HotelRoom extends Hotel {
     int roomNumber;
     
     // Default constructor
     public HotelRoom (){
+        super();
         this.roomNumber = 0;
     }
     
     // Constructor with parameters
-    public HotelRoom (int inRoomNumber, int inNumberOfBedrooms, double inBasePricePerNight, String inDescription, int inMaxOccupants){
-        super(inNumberOfBedrooms, inBasePricePerNight, inDescription, inMaxOccupants);
+    public HotelRoom(int inRoomNumber, int inVacancies, int inNumberOfBedrooms, double inBasePricePerNight, int inMaxOccupants) {
+        super(inVacancies, inNumberOfBedrooms, inBasePricePerNight, inMaxOccupants);
         this.roomNumber = inRoomNumber;
     }
     

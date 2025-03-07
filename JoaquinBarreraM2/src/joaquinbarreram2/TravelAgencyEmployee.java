@@ -45,12 +45,17 @@ public class TravelAgencyEmployee extends Person {
     }        
     
     // Override
-    @Override
-    public String toString(){
-        return super.toString() + "\nIs A Manager: " + this.isAManager +
-               "\nSalary: $" + String.format("%.2f", this.salary) +
-               "\nWork Number: " + this.workNumber +
-               "\nlogin name: " + this.loginName +
-               "\npassword: " + this.password;
+    @Override 
+    public void displayDetails(){
+        System.out.println("Employee");
+        System.out.println("Name: " + this.name);
+        System.out.println("Address: " + this.address);
+        System.out.println("Id: " + this.id);
+        System.out.println("Is A Manager: " + this.isAManager);
+        System.out.println("Salary: $" + String.format("%.2f", this.salary));
+        System.out.println("Work Number: " + this.workNumber);
+        System.out.println("Login name: " + this.loginName);
+        System.out.println("Password: " + this.password);
     }
+
 }

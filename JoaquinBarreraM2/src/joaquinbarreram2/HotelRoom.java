@@ -10,14 +10,17 @@ public class HotelRoom extends Hotel {
     }
     
     // Constructor with parameters
-    public HotelRoom(int inRoomNumber, int inVacancies, int inNumberOfBedrooms, double inBasePricePerNight, int inMaxOccupants) {
-        super(inVacancies, inNumberOfBedrooms, inBasePricePerNight, inMaxOccupants);
+    public HotelRoom(int inRoomNumber, int inNumberOfBedrooms, double inBasePricePerNight, int inMaxOccupants) {
+        super(0, inNumberOfBedrooms, inBasePricePerNight, inMaxOccupants);
         this.roomNumber = inRoomNumber;
     }
     
     @Override
-    public String toString(){
-        return super.toString() + "\nRoom Number: " + this.roomNumber;
+    public void displayDetails(){
+        System.out.println("Hotel Room");
+        System.out.println("Room number: " + this.roomNumber);
+        System.out.println("Number of bedrooms: " + this.numberOfBedrooms);
+        System.out.println("Max occupants allowed in room: " + this.maxOccupants);
+        System.out.println("Price per night: $" + String.format("%.2f", this.basePricePerNight));
     }
-    
 }

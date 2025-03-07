@@ -16,7 +16,11 @@ public class Customer extends Person {
     
     // Override
     @Override
-    public String toString(){
-        return super.toString() + "\nBalance Owed: $" + String.format("%.2f", this.balanceOwed);
+    public void displayDetails(){
+        System.out.println("Customer");
+        System.out.println("Id: " + this.id);
+        System.out.println("Name: " + this.name);
+        System.out.println("Address: " + this.address);
+        System.out.println("Balance owed: $" + String.format("%.2f", this.balanceOwed));
     }
 }

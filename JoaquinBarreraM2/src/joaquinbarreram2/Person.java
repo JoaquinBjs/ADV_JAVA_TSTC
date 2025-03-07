@@ -1,6 +1,6 @@
 package joaquinbarreram2;
 
-public class Person {
+abstract class Person {
     String name = null, address = null;
     int id = 0;
 
@@ -18,13 +18,5 @@ public class Person {
         this.id = inId;
     }
     
-
-    
-    // Override
-    @Override
-    public String toString(){
-        return "\nname: " + this.name +
-               "\naddress: " + this.address +
-               "\nid: " + this.id;
-    }
+    abstract void displayDetails();
 }

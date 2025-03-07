@@ -1,6 +1,6 @@
 package joaquinbarreram2;
 
-public class Home extends Lodging {
+    class Home extends Lodging {
     double cost = 0;
     
     // Default constructor
@@ -16,8 +16,9 @@ public class Home extends Lodging {
     }
     
     @Override
-    public String toString(){
-        return super.toString() + "\nTotal price of the home: " + this.cost;
+    public void displayDetails(){
+        System.out.println("House");
+        System.out.println("Cost: " + this.cost);        
+        System.out.println("Number of Bedrooms: " + this.numberOfBedrooms);
     }
-    
 }

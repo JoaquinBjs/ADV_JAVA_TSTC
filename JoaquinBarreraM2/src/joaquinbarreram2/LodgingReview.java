@@ -20,7 +20,7 @@ public class LodgingReview {
 
     }
     
-    // Override
+    // Override 
     @Override
     public String toString(){
         return "\nLodging Review: " + this.comments +

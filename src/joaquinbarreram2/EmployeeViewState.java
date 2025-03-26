@@ -8,9 +8,12 @@ public class EmployeeViewState extends ViewState {
     // Objects
     Scanner sc = new Scanner(System.in);
     String eOption = null;
-    LoginState lState = new LoginState();
+    TravelAgencyEmployee currEmployee = null;
     
-    
+    // Constructor to hold the logged in employee
+    public EmployeeViewState(TravelAgencyEmployee inEmployee){
+        this.currEmployee = inEmployee;
+    }
     @Override
     void enter() {
         System.out.println("====================");
@@ -18,7 +21,7 @@ public class EmployeeViewState extends ViewState {
         System.out.println("2. Remove Lodge");
         System.out.println("3. List Lodges");
         System.out.println("4. Log out");
-        if (lState.getIsManager()) {
+        if (currEmployee.isAManager) {
             System.out.println("5. Manager View");
         }
         System.out.println("====================");
@@ -28,7 +31,7 @@ public class EmployeeViewState extends ViewState {
     void update() {
         while (isRunning) {
             enter();
-            if (!lState.getIsManager()) {
+            if (!currEmployee.isAManager) {
                 System.out.println("Select an option (1-4): ");
                 eOption = sc.nextLine();
                 switch (eOption) {
@@ -39,36 +42,45 @@ public class EmployeeViewState extends ViewState {
                         System.out.println("2. Hotel");
                         System.out.println("=======================");
                         String sOption = sc.nextLine();
-                        if (sOption.equals("1")) {
-                            // Add Home
-                            System.out.println("Enter cost: ");
-                            double cost = Double.parseDouble(sc.nextLine());
-                            System.out.println("Enter number of bedrooms: ");
-                            int bedrooms = Integer.parseInt(sc.nextLine());
-                            System.out.println("Enter name: ");
-                            String name = sc.nextLine();
-                            Home house = new Home(cost, bedrooms, name);
-                            Lodging.allLodgings.add(house);
-                            System.out.println("Home added successfully!");
-                        } else if (sOption.equals("2")) {
-                            // Add Hotel
-                            System.out.println("Enter vacancies: ");
-                            int vacancies = Integer.parseInt(sc.nextLine());
-                            System.out.println("Enter number of bedrooms: ");
-                            int bedrooms = Integer.parseInt(sc.nextLine());
-                            System.out.println("Enter base price per night: ");
-                            double basePrice = Double.parseDouble(sc.nextLine());
-                            System.out.println("Enter max occupants: ");
-                            int maxOccupants = Integer.parseInt(sc.nextLine());
-                            System.out.println("Enter name: ");
-                            String name = sc.nextLine();
-                            Hotel hotel = new Hotel(vacancies, bedrooms, basePrice, maxOccupants, name);
-                            Lodging.allLodgings.add(hotel);
-                            System.out.println("Hotel added successfully!");
-                        } else {
+                    switch (sOption) {
+                        case "1":
+                            {
+                                // Add Home
+                                System.out.println("Enter cost: ");
+                                double cost = Double.parseDouble(sc.nextLine());
+                                System.out.println("Enter number of bedrooms: ");
+                                int bedrooms = Integer.parseInt(sc.nextLine());
+                                System.out.println("Enter name: ");
+                                String name = sc.nextLine();
+                                Home house = new Home(cost, bedrooms, name);
+                                Lodging.allLodgings.add(house);
+                                System.out.println("Home added successfully!");
+                                break;
+                            }
+                        case "2":
+                            {
+                                // Add Hotel
+                                System.out.println("Enter vacancies: ");
+                                int vacancies = Integer.parseInt(sc.nextLine());
+                                System.out.println("Enter number of bedrooms: ");
+                                int bedrooms = Integer.parseInt(sc.nextLine());
+                                System.out.println("Enter base price per night: ");
+                                double basePrice = Double.parseDouble(sc.nextLine());
+                                System.out.println("Enter max occupants: ");
+                                int maxOccupants = Integer.parseInt(sc.nextLine());
+                                System.out.println("Enter name: ");
+                                String name = sc.nextLine();
+                                Hotel hotel = new Hotel(vacancies, bedrooms, basePrice, maxOccupants, name);
+                                Lodging.allLodgings.add(hotel);
+                                System.out.println("Hotel added successfully!");
+                                break;
+                            }
+                        default:
                             System.out.println("Invalid option");
-                        }
+                            break;
+                    }
                         break;
+
                     case "2":
                         // Remove Lodge
                         System.out.println("Select a lodging to remove: ");
@@ -91,6 +103,7 @@ public class EmployeeViewState extends ViewState {
                     case "4":
                         // Log out
                         isRunning = false;
+                        currEmployee = null;
                         break;
                     default:
                         System.out.println("Invalid option");
@@ -159,10 +172,11 @@ public class EmployeeViewState extends ViewState {
                     case "4":
                         // Log out
                         isRunning = false;
+                        currEmployee = null;
                         break;
                     case "5":
                         // Switch to Manager View
-                        ManagerViewState mView = new ManagerViewState();
+                        ManagerViewState mView = new ManagerViewState(this.currEmployee);
                         mView.update();
                         break;
                     default:

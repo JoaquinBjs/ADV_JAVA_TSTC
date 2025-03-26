@@ -5,28 +5,13 @@ import java.util.Scanner;
 class LoginState extends ViewState {
     Scanner scan = new Scanner(System.in);
     static ArrayList<TravelAgencyEmployee> employees = new ArrayList<>();
-    ArrayList<Customer> customers = new ArrayList<>();
+    static ArrayList<Customer> customers = new ArrayList<>();
     String option = null;
     String inName = null;
     String inPassword = null;
     final int REQUIRED_LENGTH = 9;
     private boolean isRunning = true;
-    static boolean isManager = false;
-    boolean isEmployee = false;
-
-    public boolean matches() {
-        for (int i = 0; i < employees.size(); i++) {
-            if (inName.equals(employees.get(i).getLoginName()) && inPassword.equals(employees.get(i).getPassword())) {
-                if (employees.get(i).isAManager) {
-                    isManager = true;
-                } else {
-                    isEmployee = true;
-                }
-                return true;
-            }
-        }
-        return false;
-    }
+//    boolean isEmployee = false;
 
     public boolean validation() {
         boolean maxLength = true;   
@@ -52,6 +37,7 @@ class LoginState extends ViewState {
 
     public void signUp() {
         System.out.println("Enter a new username: ");
+//        System.out.println("customers array size before signup is: "+customers.size());
         inName = scan.nextLine();
         boolean nameExists = false;
         for (int i = 0; i < customers.size(); i++) {
@@ -82,6 +68,50 @@ class LoginState extends ViewState {
 
         customers.add(new Customer(0.0, inName, "Unknown", customers.size() + 1, inName, inPassword));
         System.out.println("Account successfully created!");
+//        System.out.println("The customer array size after signup: " + customers.size());
+    }
+
+
+    public boolean matches() {
+        // check employees
+        for (int i = 0; i < employees.size(); i++) {
+            if (inName.equals(employees.get(i).getLoginName()) && inPassword.equals(employees.get(i).getPassword())) {
+//                if (employees.get(i).isAManager) {
+//                    isManager = true;
+//                } else {
+//                    isEmployee = true;
+//                }
+                return true;
+            }
+        }
+        // check customers
+        for (int i = 0; i < customers.size(); i++) {
+            if (inName.equals(customers.get(i).getUsername()) && inPassword.equals(customers.get(i).getPassword())) {
+                return true; 
+            }
+        }
+        return false;
+    }
+    
+    // Return the customer thst mstches if the, inputed name and password matches
+    public Customer cMatches() {
+        for (int i = 0; i < customers.size(); i++) {
+            if (inName.equals(customers.get(i).getUsername()) && 
+                inPassword.equals(customers.get(i).getPassword())) {
+                return customers.get(i);
+            }
+        }
+        return null;
+    }
+    
+    // Return the employee thst mstches if the, inputed name and password matches
+    public TravelAgencyEmployee eOMatches() {  
+        for (int i = 0; i < employees.size(); i++) {
+            if (inName.equals(employees.get(i).getLoginName()) && inPassword.equals(employees.get(i).getPassword())) {
+                return employees.get(i);
+            }
+        }
+        return null;
     }
 
     public void login() {
@@ -89,21 +119,32 @@ class LoginState extends ViewState {
         inName = scan.nextLine();
         System.out.println("Enter password: ");
         inPassword = scan.nextLine();
+        
+        Customer loggedInCustomer = cMatches();
+        TravelAgencyEmployee loggedInEmployee = eOMatches();
+        
+//        for (int i = 0; i < customers.size(); i++) {
+//            System.out.println("Customer: " + customers.get(i).name);
+//            System.out.println("Password: " + customers.get(i).getPassword());
+//        }
 
-        if (matches()) {
+        if (loggedInEmployee != null) {
             System.out.println("Login successful!");
-            if (isManager) {
-                ManagerViewState mView = new ManagerViewState();
+            if (loggedInEmployee.isAManager) {
+//                System.out.println("customers array size when manager logs in is: " + customers.size());
+                ManagerViewState mView = new ManagerViewState(loggedInEmployee);
                 mView.update();
-            } else if (isEmployee) {
-                EmployeeViewState eView = new EmployeeViewState();
-                eView.update();
             } else {
-                CustomerViewState cView = new CustomerViewState();
-                cView.update();
+                EmployeeViewState eView = new EmployeeViewState(loggedInEmployee);
+                eView.update();
             }
+        } else if (loggedInCustomer != null) { // If not an employee, check customers
+            System.out.println("Login successful!");
+            CustomerViewState cView = new CustomerViewState(loggedInCustomer);
+            cView.update();
+
         } else {
-            System.out.println("Invalid username or password.");
+            System.out.println("Invalid username or password");
         }
     }
 
@@ -150,21 +191,18 @@ class LoginState extends ViewState {
                     break;
                 case "3":
                     System.out.println("Continuing as a guest");
-                    CustomerViewState cView = new CustomerViewState();
+                    CustomerViewState cView = new CustomerViewState(null);
                     cView.update();
                     break;
                 case "4":
                     System.out.println("Exiting program");
                     isRunning = false;
+                    System.exit(0);
                     break;
                 default:
                     System.out.println("Invalid option");
                     break;
             }
         }
-    }
-
-    public boolean getIsManager() {
-        return this.isManager;
     }
 }

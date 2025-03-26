@@ -6,9 +6,15 @@ class ManagerViewState extends ViewState {
     boolean isRunning = true;
     
     // Objects
-    
     Scanner sc = new Scanner(System.in);
     LoginState lState;
+    LoginState loginState;
+    TravelAgencyEmployee currUser; 
+    
+     // get existing logged in user
+    public ManagerViewState(TravelAgencyEmployee user) {
+        this.currUser = user; 
+    }
     
     // Display enter prompt
     @Override
@@ -87,13 +93,18 @@ class ManagerViewState extends ViewState {
                     break;
                 case "5":
                     // Switch to Employee View
-                    EmployeeViewState eView = new EmployeeViewState();
+                    EmployeeViewState eView = new EmployeeViewState(this.currUser);
                     eView.update();
                     break;
                 case "6":
                     // Log Out
                     isRunning = false;
-                    lState.isManager = false;
+//                    lState.isManager = false;
+                    System.out.println("Logging out...");
+                    isRunning = false;
+                    LoginState loginView = new LoginState();
+                    loginView.update(); 
+                    currUser = null;
                     break;
                 default:
                     System.out.println("Invalid option");

@@ -6,11 +6,19 @@ public class CustomerViewState extends ViewState {
     // Objects
     Scanner sc = new Scanner(System.in);
     Lodging lodgeOrder = null;
+    Customer currCustomer = new Customer();
+    LoginState lState = new LoginState();
+   
     
     // Variables
     boolean isRunning = true;
     int numOfNights = 0;
-
+    
+    // Constructor to hold the current logged in customer, to be used if I find a use for it
+    public CustomerViewState (Customer inCustomer){
+        this.currCustomer = inCustomer;
+    }
+    
     //  Display Lodgings
     private void viewLodgings() {
         System.out.println("Displaying available lodgings...");
@@ -92,6 +100,7 @@ public class CustomerViewState extends ViewState {
     // update view states
     @Override
     void update() {
+//        System.out.println("customers array list on signout is: " + lState.customers.size());
         while (isRunning) {
             enter();
             String input = sc.nextLine();

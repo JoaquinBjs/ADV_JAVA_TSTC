@@ -37,7 +37,7 @@ class LoginState extends ViewState {
 
     public void signUp() {
         System.out.println("Enter a new username: ");
-//        System.out.println("customers array size before signup is: "+customers.size());
+//        System.out.println("customers array size before signup is: "+customers.size()); 
         inName = scan.nextLine();
         boolean nameExists = false;
         for (int i = 0; i < customers.size(); i++) {

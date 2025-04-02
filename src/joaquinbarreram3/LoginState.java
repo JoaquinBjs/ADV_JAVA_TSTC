@@ -1,6 +1,5 @@
 package joaquinbarreram3;
 import java.io.*;
-import java.util.ArrayList; 
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -8,8 +7,8 @@ import java.util.logging.Logger;
 
 class LoginState extends ViewState {
     Scanner scan = new Scanner(System.in);
-    static ArrayList<TravelAgencyEmployee> employees = new ArrayList<>();
-    static ArrayList<Customer> customers = new ArrayList<>();
+//    static ArrayList<TravelAgencyEmployee> employees = new ArrayList<>();
+//    static ArrayList<Customer> customers = new ArrayList<>();
     String option = null;
     String inName = null;
     String inPassword = null;
@@ -39,30 +38,106 @@ class LoginState extends ViewState {
             return false;
         }
     }
+    
+    // Encrypt password method
+    public String encryptPassword(String inPassword){
+        StringBuilder encryptedPassword = new StringBuilder(inPassword); // Object
+        
+        // Encrypts password
+        // Starts to encrypt password by adding 5 to the decimal value of each character
+        for (int i = 0; i < encryptedPassword.length(); i++){
+            encryptedPassword.setCharAt(i, (char) (encryptedPassword.charAt(i) + 5));
+        }
+        // Stores variable after shifting ascii decimals
+//        String afterShifting = encryptedPassword.toString();
+//        System.out.println("(Encrypt)Encrypted password before swap: " + encryptedPassword); testing
+        // Swaps first character with last
+        // Saves the first character
+        char firstChar = encryptedPassword.charAt(0);        
+        
+        // Swaps the first with the last character
+        encryptedPassword.setCharAt(0, encryptedPassword.charAt(encryptedPassword.length() - 1));
+        
+        // Swaps the last with the first character, using our variable that saves the first character
+        encryptedPassword.setCharAt(encryptedPassword.length() - 1, firstChar);
+        
+        // Stores password after swapping letters
+//        String afterSwapping = encryptedPassword.toString();
+        
+        
+        // add extra character
+        encryptedPassword.append('$');
+        
+        // Stores password after adding the distractor
+//        String afterDistractor = encryptedPassword.toString();
+        
+        return encryptedPassword.toString();
+    }
+    
+    // Decrypt password method
+    public String decryptPassword(String inPassword){
+        // Object
+        StringBuilder decryptedPassword = new StringBuilder(inPassword);
+        
+        // Decrypts password
+        // Removes the extra character
+        decryptedPassword.deleteCharAt(decryptedPassword.length() - 1);  
+        
+//        System.out.println("(Decrypt)Encrypted password before swap: " + decryptedPassword); testing
+        // Saves last and first character
+        char lastChar = decryptedPassword.charAt(decryptedPassword.length() - 1);
+        char firstChar = decryptedPassword.charAt(0);
+        
+        // Swaps Characters back
+        decryptedPassword.setCharAt(0, lastChar);
+        decryptedPassword.setCharAt(decryptedPassword.length() - 1, firstChar);            
+
+        // Decrypt password loop by shifting the ascii decimal values back
+        for (int i = 0; i < decryptedPassword.length(); i++){
+            decryptedPassword.setCharAt(i, (char) (decryptedPassword.charAt(i) - 5));
+        }
+        
+        return decryptedPassword.toString();
+        
+    }
 
     public void signUp() {
         System.out.println("Enter a new username: ");
-//        System.out.println("customers array size before signup is: "+customers.size()); 
         inName = scan.nextLine();
+        
+        // checks if a name exists by reading through the file
         boolean nameExists = false;
-        for (int i = 0; i < customers.size(); i++) {
-            if (inName.equals(customers.get(i).getUsername())) {
-                nameExists = true;
-                break;
-            }
-        }
-        while (nameExists) {
-            System.out.println("Username already exists! Enter a new username: ");
-            inName = scan.nextLine();
-            nameExists = false;
-            for (int i = 0; i < customers.size(); i++) {
-                if (inName.equals(customers.get(i).getUsername())) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram3/customerAccounts.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] lineData = line.split(",");
+                if (lineData.length > 0 && inName.equals(lineData[0])) {
                     nameExists = true;
                     break;
                 }
             }
+        } catch (IOException ex) {
+            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+    
+        while (nameExists) {
+            System.out.println("Username already exists! Enter a new username: ");
+            inName = scan.nextLine();
+            nameExists = false;
+            try (BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram3/customerAccounts.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] lineData = line.split(",");
+                    if (lineData.length > 0 && inName.equals(lineData[0])) {
+                        nameExists = true;
+                        break;
+                    }
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    
         System.out.println("Enter a password: ");
         inPassword = scan.nextLine();
         while (!validation()) {
@@ -70,29 +145,33 @@ class LoginState extends ViewState {
             System.out.println("Enter a valid password: ");
             inPassword = scan.nextLine();
         }
-
-        customers.add(new Customer(inName, inPassword,customers.size() + 1, 0.0, inName, "Unknown"));
-        Customer customer = new Customer(inName, inPassword,customers.size() + 1,  0.0, inName, "Unknown");
-        System.out.println("Account successfully created!");
-
-//        System.out.println("The customer array size after signup: " + customers.size());
-
-        try {
-            System.out.println("POPPING OFF!");
-            // Saves manager and employee account to accounts
-            BufferedWriter writer = new BufferedWriter(new FileWriter("src/joaquinbarreram3/customerAccounts.txt", true));
-            
-            writer.write(String.format("\n%s,%s,%d,%.2f,%s,%s",
-                     customer.getUsername(), customer.getPassword(),customer.id, customer.balanceOwed, customer.name, customer.address));
-
-            writer.close();
+        inPassword = encryptPassword(inPassword);
+    
+        // Makes new id by counting customers
+        int newId = 1;
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram3/customerAccounts.txt"))) {
+            while (reader.readLine() != null) {
+                newId++;
+            }
         } catch (IOException ex) {
-            System.out.println("ERROR: " + ex);
-//            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/joaquinbarreram3/customerAccounts.txt", true))) {
+            writer.write(String.format("\n%s,%s,%d,%.2f,%s,%s",
+                    inName,
+                    inPassword,
+                    newId,
+                    0.0,
+                    inName,
+                    "Unknown"));
+            System.out.println("Account created!");
+        } catch (IOException ex) {
+            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-
+    
+    
     /*    public boolean matches() {
     // check employees
     for (int i = 0; i < employees.size(); i++) {
@@ -114,6 +193,7 @@ class LoginState extends ViewState {
     return false;
     }*/
     
+    
     // Return the customer thst mstches if the, inputed name and password matches
     public Customer cMatches() {
         try {
@@ -127,7 +207,7 @@ class LoginState extends ViewState {
 
                 if (employeeData.length >= 6) { // Ensure we have all 6 attributes in the array
                     String username = employeeData[0];
-                    String password = employeeData[1];
+                    String password = decryptPassword(employeeData[1]);
 //                    System.out.println("NAME: " + employeeData[0]); testing
 //                    System.out.println("Popping off in cMatches if statement"); testing
                     // If the username and password is equal, continue recreating the objecr, if not, move to the next line, and check if that password and username is equal
@@ -168,7 +248,7 @@ class LoginState extends ViewState {
                 String[] employeeData = line.split(",");
                 if (employeeData.length >= 8) { // Ensure we have all 8 attributes in the array
                     String username = employeeData[0];
-                    String password = employeeData[1];
+                    String password = decryptPassword(employeeData[1]);
                     
                     // If the username and password is equal, continue recreating the objecr, if not, move to the next line, and check if that password and username is equal
                     if (inName.equals(username) && inPassword.equals(password)) {
@@ -179,7 +259,7 @@ class LoginState extends ViewState {
                         String workNumber = employeeData[5];
                         String name = employeeData[6];
                         String address = employeeData[7];
-//                        System.out.println(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",username, password, id, isManager, salary, workNumber, name, address)); testing
+                        System.out.println(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",username, password, id, isManager, salary, workNumber, name, address)); 
                         return new TravelAgencyEmployee(
                             username,
                             password,
@@ -269,7 +349,7 @@ class LoginState extends ViewState {
             BufferedWriter writer = new BufferedWriter(new FileWriter("src/joaquinbarreram3/employeeAccounts.txt", true));
             TravelAgencyEmployee emp = new TravelAgencyEmployee(
                     "Employee",
-                    "password", 
+                    encryptPassword("password"), 
                     1,
                     false,
                     50000, 
@@ -282,7 +362,7 @@ class LoginState extends ViewState {
             
             TravelAgencyEmployee mgr = new TravelAgencyEmployee(
                     "Manager",
-                    "password",
+                    encryptPassword("password"),
                     2,
                     true,
                     50000,
@@ -298,49 +378,45 @@ class LoginState extends ViewState {
             Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
         }
         }
-        login();
-        
-//        // Adds the password and username stated in the rubric
-////        TravelAgencyEmployee mgr1 = new TravelAgencyEmployee(true, 50000, "123-456-7890", "John Doe", "Company Address", 1, "password", "Manager");
-////        employees.add(emp);
-////        employees.add(mgr1);
-//        Hotel hotel1 = new Hotel(20,83,9.0,12, "4 seasons");
-//        Hotel hotel2 = new Hotel(67,12,37.2,5, "956 Hotel");
-//        Home home1 = new Home(12.1,812, "Blue House");
-//        Home home2 = new Home(21.23,3, "Mansion");
-//        Home home3 = new Home(10.61,2, "Big Home");
-//        Lodging.allLodgings.add(hotel1);
-//        Lodging.allLodgings.add(hotel2);
-//        Lodging.allLodgings.add(home1);
-//        Lodging.allLodgings.add(home2);
-//        Lodging.allLodgings.add(home3);
-////        CustomerViewState cView = new CustomerViewState();
-////        EmployeeViewState eView = new EmployeeViewState();
-////        ManagerViewState mView = new ManagerViewState();
-//        while (isRunning) {
-//            enter();
-//            option = scan.nextLine();
-//            switch (option) {
-//                case "1":
-//                    login();
-//                    break;
-//                case "2":
-//                    signUp();
-//                    break;
-//                case "3":
-//                    System.out.println("Continuing as a guest");
-//                    CustomerViewState cView = new CustomerViewState(null);
-//                    cView.update();
-//                    break;
-//                case "4":
-//                    System.out.println("Exiting program");
-//                    isRunning = false;
-//                    System.exit(0);
-//                    break;
-//                default:
-//                    System.out.println("Invalid option");
-//                    break;
-//            }
-//        }
+
+        // Adds the password and username stated in the rubric
+        Hotel hotel1 = new Hotel(20,83,9.0,12, "4 seasons");
+        Hotel hotel2 = new Hotel(67,12,37.2,5, "956 Hotel");
+        Home home1 = new Home(12.1,812, "Blue House");
+        Home home2 = new Home(21.23,3, "Mansion");
+        Home home3 = new Home(10.61,2, "Big Home");
+        Lodging.allLodgings.add(hotel1);
+        Lodging.allLodgings.add(hotel2);
+        Lodging.allLodgings.add(home1);
+        Lodging.allLodgings.add(home2);
+        Lodging.allLodgings.add(home3);
+//        CustomerViewState cView = new CustomerViewState();
+//        EmployeeViewState eView = new EmployeeViewState();
+//        ManagerViewState mView = new ManagerViewState();
+        while (isRunning) {
+            enter();
+            option = scan.nextLine();
+            switch (option) {
+                case "1":
+                    login();
+                    break;
+                case "2":
+                    signUp();
+                    break;
+                case "3":
+                    System.out.println("Continuing as a guest");
+                    CustomerViewState cView = new CustomerViewState(null);
+                    cView.update();
+                    break;
+                case "4":
+                    System.out.println("Exiting program");
+                    isRunning = false;
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid option");
+                    break;
+            }
+        }
     }
 }

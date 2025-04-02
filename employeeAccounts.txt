@@ -1,5 +1,0 @@
-
-Manager: false | Salary: $238.00 | Work Number: 2094 | name: Employee1 | address: 0294 | id: 2 | password: EMPLOYEE12345 | loginName: Employee1
-Manager: false | Salary: $123.00 | Work Number: 23 | name: 839DH | address: 32 | id: 3 | password: 89D | loginName: 839DH
-Manager: false | Salary: $1.00 | Work Number: 1 | name: 1 | address: 1 | id: 2 | password: 1 | loginName: 1
- Test

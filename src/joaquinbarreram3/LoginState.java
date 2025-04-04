@@ -1,5 +1,6 @@
 package joaquinbarreram3;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -7,11 +8,11 @@ import java.util.logging.Logger;
 
 class LoginState extends ViewState {
     Scanner scan = new Scanner(System.in);
-//    static ArrayList<TravelAgencyEmployee> employees = new ArrayList<>();
-//    static ArrayList<Customer> customers = new ArrayList<>();
     String option = null;
     String inName = null;
     String inPassword = null;
+    public static ArrayList<Customer> customers = new ArrayList<>();
+    public static ArrayList<TravelAgencyEmployee> employees = new ArrayList<>();
     final int REQUIRED_LENGTH = 9;
     private boolean isRunning = true;
     int count = 0;
@@ -100,7 +101,7 @@ class LoginState extends ViewState {
         return decryptedPassword.toString();
         
     }
-
+    
     public void signUp() {
         System.out.println("Enter a new username: ");
         inName = scan.nextLine();
@@ -145,54 +146,28 @@ class LoginState extends ViewState {
             System.out.println("Enter a valid password: ");
             inPassword = scan.nextLine();
         }
-        inPassword = encryptPassword(inPassword);
     
-        // Makes new id by counting customers
-        int newId = 1;
-        try (BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram3/customerAccounts.txt"))) {
-            while (reader.readLine() != null) {
-                newId++;
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        // Makes new id by counting existing customers + 1
+        int newId = customers.size() + 1;
     
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/joaquinbarreram3/customerAccounts.txt", true))) {
-            writer.write(String.format("\n%s,%s,%d,%.2f,%s,%s",
-                    inName,
-                    inPassword,
-                    newId,
-                    0.0,
-                    inName,
-                    "Unknown"));
-            System.out.println("Account created!");
-        } catch (IOException ex) {
-            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        // Create new customer object (store unencrypted password in memory)
+        Customer newCustomer = new Customer(
+            inName,
+            inPassword,  // Store unencrypted in memory
+            newId,
+            0.0,
+            inName,
+            "Unknown"
+        );
+        
+        // Add to customers ArrayList
+        customers.add(newCustomer);
+        
+        // Save to file (this will encrypt the password)
+        save();
+        
+        System.out.println("Account created!");
     }
-    
-    
-    /*    public boolean matches() {
-    // check employees
-    for (int i = 0; i < employees.size(); i++) {
-    if (inName.equals(employees.get(i).getLoginName()) && inPassword.equals(employees.get(i).getPassword())) {
-    //                if (employees.get(i).isAManager) {
-    //                    isManager = true;
-    //                } else {
-    //                    isEmployee = true;
-    //                }
-    return true;
-    }
-    }
-    // check customers
-    for (int i = 0; i < customers.size(); i++) {
-    if (inName.equals(customers.get(i).getUsername()) && inPassword.equals(customers.get(i).getPassword())) {
-    return true;
-    }
-    }
-    return false;
-    }*/
-    
     
     // Return the customer thst mstches if the, inputed name and password matches
     public Customer cMatches() {
@@ -299,10 +274,10 @@ class LoginState extends ViewState {
             System.out.println("Login successful!");
             if (loggedInEmployee.isAManager) {
 //                System.out.println("customers array size when manager logs in is: " + customers.size());
-                ManagerViewState mView = new ManagerViewState(loggedInEmployee);
+                ManagerViewState mView = new ManagerViewState(loggedInEmployee, this); // This is getting the loginstate
                 mView.update();
             } else {
-                EmployeeViewState eView = new EmployeeViewState(loggedInEmployee);
+                EmployeeViewState eView = new EmployeeViewState(loggedInEmployee, this); // This is getting loginstate 
                 eView.update();
             }
         } else if (loggedInCustomer != null) { // If not an employee, check customers
@@ -329,70 +304,8 @@ class LoginState extends ViewState {
 
     @Override
     void update() {
-        // Counts how many lines there are
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram3/employeeAccounts.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                
-                count++;
-            }
-            reader.close();
-        } catch (IOException ex) {
-            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        // only creates the manager and employee loging if the file is empty
-        if (count < 1){
-        try {
-//            System.out.println("POPPING OFF!");
-            // Saves manager and employee account to accounts
-            BufferedWriter writer = new BufferedWriter(new FileWriter("src/joaquinbarreram3/employeeAccounts.txt", true));
-            TravelAgencyEmployee emp = new TravelAgencyEmployee(
-                    "Employee",
-                    encryptPassword("password"), 
-                    1,
-                    false,
-                    50000, 
-                    "123-456-7890", 
-                    "Jane Doe", 
-                    "Company Address"
-            );
-            writer.write(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",
-                    emp.getLoginName(), emp.getPassword(),emp.id,emp.isAManager, emp.salary, emp.workNumber, emp.name, emp.address));
-            
-            TravelAgencyEmployee mgr = new TravelAgencyEmployee(
-                    "Manager",
-                    encryptPassword("password"),
-                    2,
-                    true,
-                    50000,
-                    "123-456-7890",
-                    "John Doe",
-                    "Company Address"
-            );
-            writer.write(String.format("\n%s,%s,%d,%b,$%.2f,%s,%s,%s",
-                     mgr.getLoginName(), mgr.getPassword(),mgr.id, mgr.isAManager, mgr.salary, mgr.workNumber, mgr.name, mgr.address));            
-            writer.close();
-        } catch (IOException ex) {
-            System.out.println("ERROR: " + ex);
-            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        }
-
-        // Adds the password and username stated in the rubric
-        Hotel hotel1 = new Hotel(20,83,9.0,12, "4 seasons");
-        Hotel hotel2 = new Hotel(67,12,37.2,5, "956 Hotel");
-        Home home1 = new Home(12.1,812, "Blue House");
-        Home home2 = new Home(21.23,3, "Mansion");
-        Home home3 = new Home(10.61,2, "Big Home");
-        Lodging.allLodgings.add(hotel1);
-        Lodging.allLodgings.add(hotel2);
-        Lodging.allLodgings.add(home1);
-        Lodging.allLodgings.add(home2);
-        Lodging.allLodgings.add(home3);
-//        CustomerViewState cView = new CustomerViewState();
-//        EmployeeViewState eView = new EmployeeViewState();
-//        ManagerViewState mView = new ManagerViewState();
+        // load data
+        load();
         while (isRunning) {
             enter();
             option = scan.nextLine();
@@ -417,6 +330,207 @@ class LoginState extends ViewState {
                     System.out.println("Invalid option");
                     break;
             }
+        }
+    }
+    @Override
+    public void save() {
+        try {
+            // Save customers to file
+            BufferedWriter customerWriter = new BufferedWriter(new FileWriter("src/joaquinbarreram3/customerAccounts.txt"));
+            for (int i = 0; i < customers.size(); i++) {
+                Customer customer = customers.get(i);
+                customerWriter.write(String.format("%s,%s,%d,%.2f,%s,%s",
+                        customer.getUsername(),
+                        encryptPassword(customer.getPassword()),
+                        customer.id,
+                        customer.balanceOwed,
+                        customer.name,
+                        customer.address
+                ));
+                
+                // Add newline for all entries except the last one
+                if (i < customers.size() - 1) {
+                    customerWriter.write("\n");
+                }
+            }
+            customerWriter.close();
+            
+            // Save employees to file
+            BufferedWriter employeeWriter = new BufferedWriter(new FileWriter("src/joaquinbarreram3/employeeAccounts.txt"));
+            for (int i = 0; i < employees.size(); i++) {
+                TravelAgencyEmployee employee = employees.get(i);
+                employeeWriter.write(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",
+                        employee.getLoginName(),
+                        encryptPassword(employee.getPassword()),
+                        employee.id,
+                        employee.isAManager,
+                        employee.salary,
+                        employee.workNumber,
+                        employee.name,
+                        employee.address
+                ));
+                
+                // Add newline for all entries except the last one
+                if (i < employees.size() - 1) {
+                    employeeWriter.write("\n");
+                }
+            }
+            employeeWriter.close();
+            System.out.println("Data saved successfully!");
+        } catch (IOException ex) {
+            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Error saving data: " + ex.getMessage());
+        }
+    }
+    
+    @Override
+    public void load() {
+        // Clear existing data before loading
+        customers.clear();
+        employees.clear();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram3/employeeAccounts.txt"));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                count++;
+            }
+            reader.close();
+        } catch (IOException ex) {
+            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        // only creates the manager and employee loging if the file is empty
+        if (count < 1){
+            try {
+            //    System.out.println("POPPING OFF!");
+                // Saves manager and employee account to accounts
+                BufferedWriter writer = new BufferedWriter(new FileWriter("src/joaquinbarreram3/employeeAccounts.txt", true));
+                TravelAgencyEmployee emp = new TravelAgencyEmployee(
+                        "Employee",
+                        encryptPassword("password"), 
+                        1,
+                        false,
+                        50000, 
+                        "123-456-7890", 
+                        "Jane Doe", 
+                        "Company Address"
+                );
+                writer.write(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",
+                        emp.getLoginName(), emp.getPassword(),emp.id,emp.isAManager, emp.salary, emp.workNumber, emp.name, emp.address));
+            
+                TravelAgencyEmployee mgr = new TravelAgencyEmployee(
+                        "Manager",
+                        encryptPassword("password"),
+                        2,
+                        true,
+                        50000,
+                        "123-456-7890",
+                        "John Doe",
+                        "Company Address"
+                );
+                writer.write(String.format("\n%s,%s,%d,%b,$%.2f,%s,%s,%s",
+                         mgr.getLoginName(), mgr.getPassword(),mgr.id, mgr.isAManager, mgr.salary, mgr.workNumber, mgr.name, mgr.address));            
+                writer.close();
+            } catch (IOException ex) {
+                System.out.println("ERROR: " + ex);
+                Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }       // Adds the lodges and houses to the lodgING text file
+        try {
+        //    System.out.println("POPPING OFF!");
+            BufferedWriter writer = new BufferedWriter(new FileWriter("src\\joaquinbarreram3\\lodgingInfo.txt"));
+            writer.write(String.format("%s,%d,%d,%.2f,%d",
+                    "4 seasons",
+                    20,
+                    83,
+                    9.0,
+                    12
+            ));
+            writer.write(String.format("\n%s,%d,%d,%.2f,%d",
+                    "956 Hotel",
+                    67,
+                    12,
+                    37.2,
+                    5
+            ));
+            writer.write(String.format("\n%s,%.2f,%d", 
+                    "Blue House",
+                    12.1,
+                    812
+            ));
+            writer.write(String.format("\n%s,%.2f,%d", 
+                    "Mansion",
+                    21.23,
+                    3
+            ));
+            writer.write(String.format("\n%s,%.2f,%d", 
+                    "Big Home",
+                    10.61,
+                    2
+            ));
+            writer.close();
+        } catch (IOException ex) {
+            System.out.println("NOT POPPING OFF");
+            Logger.getLogger(Lodging.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            // Load customers from file
+            BufferedReader customerReader = new BufferedReader(new FileReader("src/joaquinbarreram3/customerAccounts.txt"));
+            String line;
+            
+            while ((line = customerReader.readLine()) != null) {
+                String[] customerData = line.split(",");
+                if (customerData.length >= 6) {
+                    String username = customerData[0];
+                    String password = decryptPassword(customerData[1]);
+                    int id = Integer.parseInt(customerData[2]);
+                    double balanceOwed = Double.parseDouble(customerData[3]);
+                    String name = customerData[4];
+                    String address = customerData[5];
+                    
+                    customers.add(new Customer(
+                        username,
+                        password,
+                        id,
+                        balanceOwed,
+                        name,
+                        address
+                    ));
+                }
+            }
+            customerReader.close();
+            
+            // Load employees from file
+            BufferedReader employeeReader = new BufferedReader(new FileReader("src/joaquinbarreram3/employeeAccounts.txt"));
+            
+            while ((line = employeeReader.readLine()) != null) {
+                String[] employeeData = line.split(",");
+                if (employeeData.length >= 8) {
+                    String loginName = employeeData[0];
+                    String password = decryptPassword(employeeData[1]);
+                    int id = Integer.parseInt(employeeData[2]);
+                    boolean isManager = Boolean.parseBoolean(employeeData[3]);
+                    double salary = Double.parseDouble(employeeData[4].replace("$", ""));
+                    String workNumber = employeeData[5];
+                    String name = employeeData[6];
+                    String address = employeeData[7];
+                    
+                    employees.add(new TravelAgencyEmployee(
+                        loginName,
+                        password,
+                        id,
+                        isManager,
+                        salary,
+                        workNumber,
+                        name,
+                        address
+                    ));
+                }
+            }
+            employeeReader.close();
+            System.out.println("Data loaded successfully!");
+        } catch (IOException ex) {
+            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Error loading data: " + ex.getMessage());
         }
     }
 }

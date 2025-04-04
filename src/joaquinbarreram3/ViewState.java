@@ -7,5 +7,10 @@ abstract class ViewState {
     // Start method
     abstract void update();
     
+    // Save method
+    abstract void save();
+    
+    // Load method
+    abstract void load();
     
 }

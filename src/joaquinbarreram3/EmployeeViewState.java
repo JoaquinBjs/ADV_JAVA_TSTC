@@ -9,10 +9,11 @@ public class EmployeeViewState extends ViewState {
     Scanner sc = new Scanner(System.in);
     String eOption = null;
     TravelAgencyEmployee currEmployee = null;
-    
+    LoginState lstate;
     // Constructor to hold the logged in employee
-    public EmployeeViewState(TravelAgencyEmployee inEmployee){
+    public EmployeeViewState(TravelAgencyEmployee inEmployee, LoginState inLState){
         this.currEmployee = inEmployee;
+        this.lstate = inLState;
     }
     @Override
     void enter() {
@@ -52,8 +53,8 @@ public class EmployeeViewState extends ViewState {
                                 int bedrooms = Integer.parseInt(sc.nextLine());
                                 System.out.println("Enter name: ");
                                 String name = sc.nextLine();
-                                Home house = new Home(cost, bedrooms, name);
-                                Lodging.allLodgings.add(house);
+                                Home house = new Home(name,cost, bedrooms);
+                                house.registerLodging();
                                 System.out.println("Home added successfully!");
                                 break;
                             }
@@ -70,8 +71,8 @@ public class EmployeeViewState extends ViewState {
                                 int maxOccupants = Integer.parseInt(sc.nextLine());
                                 System.out.println("Enter name: ");
                                 String name = sc.nextLine();
-                                Hotel hotel = new Hotel(vacancies, bedrooms, basePrice, maxOccupants, name);
-                                Lodging.allLodgings.add(hotel);
+                                Hotel hotel = new Hotel(name,vacancies, bedrooms, basePrice, maxOccupants);
+                                hotel.registerLodging();
                                 System.out.println("Hotel added successfully!");
                                 break;
                             }
@@ -129,8 +130,8 @@ public class EmployeeViewState extends ViewState {
                             int bedrooms = Integer.parseInt(sc.nextLine());
                             System.out.println("Enter name: ");
                             String name = sc.nextLine();
-                            Home house = new Home(cost, bedrooms, name);
-                            Lodging.allLodgings.add(house);
+                            Home house = new Home(name,cost, bedrooms);
+                            house.registerLodging();
                             System.out.println("Home added successfully!");
                         } else if (sOption.equals("2")) {
                             // Add Hotel
@@ -144,8 +145,8 @@ public class EmployeeViewState extends ViewState {
                             int maxOccupants = Integer.parseInt(sc.nextLine());
                             System.out.println("Enter name: ");
                             String name = sc.nextLine();
-                            Hotel hotel = new Hotel(vacancies, bedrooms, basePrice, maxOccupants, name);
-                            Lodging.allLodgings.add(hotel);
+                            Hotel hotel = new Hotel(name,vacancies, bedrooms, basePrice, maxOccupants);
+                            hotel.registerLodging();
                             System.out.println("Hotel added successfully!");
                         } else {
                             System.out.println("Invalid option");
@@ -176,7 +177,7 @@ public class EmployeeViewState extends ViewState {
                         break;
                     case "5":
                         // Switch to Manager View
-                        ManagerViewState mView = new ManagerViewState(this.currEmployee);
+                        ManagerViewState mView = new ManagerViewState(this.currEmployee, this.lstate);
                         mView.update();
                         break;
                     default:
@@ -185,5 +186,13 @@ public class EmployeeViewState extends ViewState {
                 }
             }
         }
+    }
+    @Override
+    public void load(){
+    
+    }
+    @Override
+    public void save(){
+    
     }
 }

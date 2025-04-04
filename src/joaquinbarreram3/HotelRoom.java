@@ -11,7 +11,7 @@ public class HotelRoom extends Hotel {
     
     // Constructor with parameters
     public HotelRoom(int inRoomNumber, int inNumberOfBedrooms, double inBasePricePerNight, int inMaxOccupants) {
-        super(0, inNumberOfBedrooms, inBasePricePerNight, inMaxOccupants, null);
+        super(null, 0, inNumberOfBedrooms, inBasePricePerNight, inMaxOccupants);
         this.roomNumber = inRoomNumber;
     }
     

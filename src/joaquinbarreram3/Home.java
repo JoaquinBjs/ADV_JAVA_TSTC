@@ -1,5 +1,9 @@
 package joaquinbarreram3;
 
+import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
     class Home extends Lodging {
     double cost = 0;
     
@@ -10,11 +14,22 @@ package joaquinbarreram3;
     }
     
     // Constructor with parameters
-    public Home (double inCost, int inNumberOfBedrooms,String inName){
+    public Home (String inName, double inCost, int inNumberOfBedrooms){
         super(inNumberOfBedrooms, inCost, 0, inName);
         this.cost = inCost;
     }
     
+    // Adds a home to the txt file
+    @Override
+    public void registerLodging() {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("src\\joaquinbarreram3\\lodgingInfo.txt", true));
+            writer.write(String.format("\n%s,%.2f,%d", name, cost, numberOfBedrooms));
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Home.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     @Override
     public void displayDetails(){
         System.out.println("House:");

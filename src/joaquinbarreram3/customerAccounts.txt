@@ -1,3 +1,4 @@
-Bob,P@ss0rd1234,2,0.00,Bob,Unknown
-John,p@SSWO0RD123,2,0.00,John,Unknown
+Bob,P@ss0rd123$,2,0.00,Bob,Unknown
+John,p@SSWO0RD12$,2,0.00,John,Unknown
 Manager,Xjznij8zmim/-(mxON|$,3,0.00,Manager,Unknown
+2,&7O8MMI7>=m>=76>=EE&5$,4,0.00,2,Unknown

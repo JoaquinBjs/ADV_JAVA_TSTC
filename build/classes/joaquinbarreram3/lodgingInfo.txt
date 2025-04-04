@@ -1,5 +1,4 @@
-4 seasons,20,83,9.00,12
+Kys,20,83,9.00,12
 956 Hotel,67,12,37.20,5
-Blue House,12.10,812
 Mansion,21.23,3
 Big Home,10.61,2

@@ -1,3 +1,2 @@
-Employee,password,1,false,$50000.00,123-456-7890,Jane Doe,Company Address
-Manager,password,2,true,$50000.00,123-456-7890,John Doe,Company Address
-SON GOKU,9786$,3,false,$1235.00,1237,SON GOKU,1239
+Employee,ifxx|twu$,1,false,$50000.00,123-456-7890,Jane Doe,Company Address
+Manager,ifxx|twu$,2,true,$50000.00,123-456-7890,John Doe,Company Address

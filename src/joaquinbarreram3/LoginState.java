@@ -16,6 +16,7 @@ class LoginState extends ViewState {
     final int REQUIRED_LENGTH = 9;
     private boolean isRunning = true;
     int count = 0;
+    int lCount = 0;
 //    boolean isEmployee = false;
 
     public boolean validation() {
@@ -234,7 +235,7 @@ class LoginState extends ViewState {
                         String workNumber = employeeData[5];
                         String name = employeeData[6];
                         String address = employeeData[7];
-                        System.out.println(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",username, password, id, isManager, salary, workNumber, name, address)); 
+//                        System.out.println(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",username, password, id, isManager, salary, workNumber, name, address)); testing
                         return new TravelAgencyEmployee(
                             username,
                             password,
@@ -273,6 +274,7 @@ class LoginState extends ViewState {
         if (loggedInEmployee != null) {
             System.out.println("Login successful!");
             if (loggedInEmployee.isAManager) {
+//                System.out.println("ARRAY SIZE: " + Lodging.allLodgings.size());
 //                System.out.println("customers array size when manager logs in is: " + customers.size());
                 ManagerViewState mView = new ManagerViewState(loggedInEmployee, this); // This is getting the loginstate
                 mView.update();
@@ -318,6 +320,7 @@ class LoginState extends ViewState {
                     break;
                 case "3":
                     System.out.println("Continuing as a guest");
+//                    System.out.println("ARRAY SIZE: " + Lodging.allLodgings.size());
                     CustomerViewState cView = new CustomerViewState(null);
                     cView.update();
                     break;
@@ -388,11 +391,22 @@ class LoginState extends ViewState {
         // Clear existing data before loading
         customers.clear();
         employees.clear();
+//        System.out.println("ARRAY LIST SIZE IN LOAD: " + Lodging.allLodgings.size());
         try {
             BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram3/employeeAccounts.txt"));
             String line;
             while ((line = reader.readLine()) != null) {
                 count++;
+            }
+            reader.close();
+        } catch (IOException ex) {
+            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram3/lodgingInfo.txt"));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lCount++;
             }
             reader.close();
         } catch (IOException ex) {
@@ -434,9 +448,13 @@ class LoginState extends ViewState {
                 System.out.println("ERROR: " + ex);
                 Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }       // Adds the lodges and houses to the lodgING text file
+        }  
+        if (lCount < 1){
+        // Adds the lodges and houses to the lodgING text file
         try {
         //    System.out.println("POPPING OFF!");
+        
+            // Write to file and add to lodging array
             BufferedWriter writer = new BufferedWriter(new FileWriter("src\\joaquinbarreram3\\lodgingInfo.txt"));
             writer.write(String.format("%s,%d,%d,%.2f,%d",
                     "4 seasons",
@@ -445,6 +463,9 @@ class LoginState extends ViewState {
                     9.0,
                     12
             ));
+            
+            
+            // Write to file and add to array
             writer.write(String.format("\n%s,%d,%d,%.2f,%d",
                     "956 Hotel",
                     67,
@@ -452,25 +473,46 @@ class LoginState extends ViewState {
                     37.2,
                     5
             ));
+            
+            
+            // Write to file and add to array
             writer.write(String.format("\n%s,%.2f,%d", 
                     "Blue House",
                     12.1,
                     812
             ));
+            
+            
+            // Write to file and add to array
             writer.write(String.format("\n%s,%.2f,%d", 
                     "Mansion",
                     21.23,
                     3
             ));
+            
+            
+            // Write to file and add to array
             writer.write(String.format("\n%s,%.2f,%d", 
                     "Big Home",
                     10.61,
                     2
             ));
+//            Lodging.allLodgings.add(new Home("Big Home", 10.61, 2));
+            
             writer.close();
         } catch (IOException ex) {
             System.out.println("NOT POPPING OFF");
             Logger.getLogger(Lodging.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        }
+        
+        // Adds the default lodges into array if the array is empty
+        if (Lodging.allLodgings.size() < 1){
+            Lodging.allLodgings.add(new Hotel("4 seasons", 20, 83, 9.0, 12));
+            Lodging.allLodgings.add(new Hotel("956 Hotel", 67, 12, 37.2, 5));
+            Lodging.allLodgings.add(new Home("Blue House", 12.1, 812));
+            Lodging.allLodgings.add(new Home("Mansion", 21.23, 3));
+            Lodging.allLodgings.add(new Home("Big Home", 10.61, 2));
         }
         try {
             // Load customers from file

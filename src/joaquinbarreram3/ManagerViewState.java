@@ -189,10 +189,11 @@ class ManagerViewState extends ViewState {
             case "7":
                 // Log Out
                 isRunning = false;
+                currUser = null;
+//                System.out.println("LODGING ARRAY SIZE:" + Lodging.allLodgings.size());
                 System.out.println("Logging out...");
                 LoginState loginView = new LoginState();
                 loginView.update(); 
-                currUser = null;
                 break;
                 
             default:
@@ -208,24 +209,24 @@ class ManagerViewState extends ViewState {
     @Override
     public void save() {
         try {
-            System.out.println("MANAGER VIEW STATE IS SAVING EMPLOYEES!");
+//            System.out.println("MANAGER VIEW STATE IS POPPING OFF!");
             BufferedWriter writer = new BufferedWriter(new FileWriter("src/joaquinbarreram3/employeeAccounts.txt"));
             
             for (int i = 0; i < LoginState.employees.size(); i++) {
                 TravelAgencyEmployee employee = LoginState.employees.get(i);
                 if (i == 0) {
                     writer.write(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",
-                        employee.getLoginName(), employee.getPassword(), employee.id, 
+                        employee.getLoginName(), loginState.encryptPassword(employee.getPassword()), employee.id, 
                         employee.isAManager, employee.salary, employee.workNumber, 
                         employee.name, employee.address));
-                } else {
+                } else { // Makes a new line once their is more than one line
                     writer.write(String.format("\n%s,%s,%d,%b,$%.2f,%s,%s,%s",
-                        employee.getLoginName(), employee.getPassword(), employee.id, 
+                        employee.getLoginName(), loginState.encryptPassword(employee.getPassword()), employee.id, 
                         employee.isAManager, employee.salary, employee.workNumber, 
                         employee.name, employee.address));
                 }
             }
-            writer.flush(); //  I had to use flush because sometimes the text will not appear on the txt file
+            writer.flush(); // Had to use flush because sometimes the text will not appear on the txt file
             writer.close();
         } catch (IOException ex) {
             System.out.println("NOT POPPING OFF IN MANAGER VIEW STATE SAVE");

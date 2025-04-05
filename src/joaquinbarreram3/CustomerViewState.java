@@ -23,6 +23,10 @@ public class CustomerViewState extends ViewState {
     //  Display Lodgings
     private void viewLodgings() {
         System.out.println("Displaying available lodgings...");
+        if (Lodging.allLodgings.isEmpty()) {
+            load();
+        }
+        
         for (int i = 0; i < Lodging.allLodgings.size(); i++) {
             System.out.println((1 + i) + ". " + Lodging.allLodgings.get(i).name + " || price: $" + String.format("%.2f", Lodging.allLodgings.get(i).basePricePerNight));
         }
@@ -123,9 +127,10 @@ public class CustomerViewState extends ViewState {
         try {
             // Debug message
             System.out.println("Loading available lodgings...");
-
+        
+            // CHANGE ONLY THIS LINE - use the correct file path
+            BufferedReader reader = new BufferedReader(new FileReader("src\\joaquinbarreram3\\lodgingInfo.txt"));
             
-            BufferedReader reader = new BufferedReader(new FileReader("src\\joaquinbarreram3\\lodges.txt"));
             String line;
             
             while ((line = reader.readLine()) != null) {
@@ -139,7 +144,7 @@ public class CustomerViewState extends ViewState {
                         Double.parseDouble(data[3].trim()),
                         Integer.parseInt(data[4].trim())
                     ));
-                    System.out.println("Loaded hotel: " + data[0]); // Debug
+//                    System.out.println("Loaded hotel: " + data[0]); // Debug
                 } 
                 // Home: name,cost,bedrooms
                 else if (data.length == 3) {
@@ -148,17 +153,17 @@ public class CustomerViewState extends ViewState {
                         Double.parseDouble(data[1].trim()),
                         Integer.parseInt(data[2].trim())
                     ));
-                    System.out.println("Loaded home: " + data[0]); // Debug
+//                    System.out.println("Loaded home: " + data[0]); 
                 }
             }
             reader.close();
-            System.out.println("Lodgings loaded successfully! Total: " + Lodging.allLodgings.size()); // Debug
+            System.out.println("Lodgings loaded successfully! Total: " + Lodging.allLodgings.size()); 
         } catch (IOException ex) {
-            System.out.println("Error loading lodgings: " + ex.getMessage()); // Debug
+            System.out.println("Error loading lodgings: " + ex.getMessage()); 
         }
     }
     @Override
-    public void save() {
+    public void save() { 
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter("src\\joaquinbarreram3\\lodgingInfo.txt"));
             
@@ -184,13 +189,13 @@ public class CustomerViewState extends ViewState {
                     ));
                 }
                 
-                // Add newline except after last entry
+                // Add newline after first line
                 if (i < Lodging.allLodgings.size() - 1) {
                     writer.write("\n");
                 }
             }
             writer.close();
-            System.out.println("Lodgings saved successfully!"); // Debug
+            System.out.println("Lodgings saved successfully!"); 
         } catch (IOException ex) {
             System.out.println("Error saving lodgings: " + ex.getMessage()); // Debug
         }

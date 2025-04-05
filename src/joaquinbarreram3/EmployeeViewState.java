@@ -295,6 +295,9 @@ public class EmployeeViewState extends ViewState {
                         // Log out
                         isRunning = false;
                         currEmployee = null;
+                        System.out.println("Logging out");
+                        LoginState loginView = new LoginState();
+                        loginView.update();
                         break;
                     case "6":
                         // Switch to Manager View

@@ -110,10 +110,9 @@ class ManagerViewState extends ViewState {
                     }
                     System.out.println("Enter new password (or press Enter to keep current): ");
                     String newPass = sc.nextLine();
-                    emp.setPassword(newPass);
-//                    if (!newPass.isEmpty()) {
-//                        emp.setPassword(loginState.encryptPassword(newPass));
-//                    }
+                    if (!newPass.isEmpty()) {
+                        emp.setPassword(newPass);
+                    }
                     
                     System.out.println("Enter new salary (or press Enter to keep current): ");
                     String newSalary = sc.nextLine();

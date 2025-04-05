@@ -42,7 +42,11 @@ class LoginState extends ViewState {
     }
     
     // Encrypt password method
-    public String encryptPassword(String inPassword){
+    public String encryptPassword(String inPassword) {
+        // If password is empty return a empty string, to prevent out of bounds errors
+        if (inPassword == null || inPassword.isEmpty()) {
+            return "";
+        }
         StringBuilder encryptedPassword = new StringBuilder(inPassword); // Object
         
         // Encrypts password
@@ -202,7 +206,7 @@ class LoginState extends ViewState {
                         double balanceOwed = Double.parseDouble(employeeData[3]);
                         String name = employeeData[4];
                         String address = employeeData[5];
-                        System.out.println(String.format("\n%s,%s,%d,%.2f,%s,%s", username, password,id, balanceOwed, name, address));
+//                        System.out.println(String.format("\n%s,%s,%d,%.2f,%s,%s", username, password,id, balanceOwed, name, address));
                         return new Customer(
                             username,
                             password,

@@ -62,7 +62,7 @@ class ManagerViewState extends ViewState {
                 }
                 
                 // make a new employee
-                TravelAgencyEmployee emp = new TravelAgencyEmployee(name, loginState.encryptPassword(password), nextId, false, salary, workNumber, name, address);
+                TravelAgencyEmployee emp = new TravelAgencyEmployee(name, password, nextId, false, salary, workNumber, name, address);
                 
                 LoginState.employees.add(emp);
                 save();
@@ -110,9 +110,10 @@ class ManagerViewState extends ViewState {
                     }
                     System.out.println("Enter new password (or press Enter to keep current): ");
                     String newPass = sc.nextLine();
-                    if (!newPass.isEmpty()) {
-                        emp.setPassword(loginState.encryptPassword(newPass));
-                    }
+                    emp.setPassword(newPass);
+//                    if (!newPass.isEmpty()) {
+//                        emp.setPassword(loginState.encryptPassword(newPass));
+//                    }
                     
                     System.out.println("Enter new salary (or press Enter to keep current): ");
                     String newSalary = sc.nextLine();
@@ -165,7 +166,7 @@ class ManagerViewState extends ViewState {
                 // Display employees
                 System.out.println("Select an employee to promote to manager: ");
                 for (int i = 0; i < LoginState.employees.size(); i++) {
-                    System.out.println((i + 1) + ". " + LoginState.employees.get(i).name + 
+                    System.out.println((i + 1) + ". " + LoginState.employees.get(i).getLoginName() + 
                         " - Manager: " + LoginState.employees.get(i).isAManager);
                 }
                 

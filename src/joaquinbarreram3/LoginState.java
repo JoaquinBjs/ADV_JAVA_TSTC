@@ -49,6 +49,9 @@ class LoginState extends ViewState {
         // Starts to encrypt password by adding 5 to the decimal value of each character
         for (int i = 0; i < encryptedPassword.length(); i++){
             encryptedPassword.setCharAt(i, (char) (encryptedPassword.charAt(i) + 5));
+            if (encryptedPassword.charAt(i) == 44){
+                encryptedPassword.setCharAt(i, (char) (encryptedPassword.charAt(i) + 1)); // Skip comma
+            }
         }
         // Stores variable after shifting ascii decimals
 //        String afterShifting = encryptedPassword.toString();
@@ -96,8 +99,13 @@ class LoginState extends ViewState {
 
         // Decrypt password loop by shifting the ascii decimal values back
         for (int i = 0; i < decryptedPassword.length(); i++){
-            decryptedPassword.setCharAt(i, (char) (decryptedPassword.charAt(i) - 5));
+            char c = decryptedPassword.charAt(i);
+            if (c == 45) { // 45 specifically as we dont want commas in our password due to the files seperating variables with a comma
+                c -= 1; // Undo the +1 from encryption
+            }
+            decryptedPassword.setCharAt(i, (char) (c - 5)); // Now shift back -5
         }
+
         
         return decryptedPassword.toString();
         
@@ -225,7 +233,7 @@ class LoginState extends ViewState {
                 if (employeeData.length >= 8) { // Ensure we have all 8 attributes in the array
                     String username = employeeData[0];
                     String password = decryptPassword(employeeData[1]);
-                    
+//                    System.out.println("USERNAME: " + username + " | PASSWORD: " + password);
                     // If the username and password is equal, continue recreating the objecr, if not, move to the next line, and check if that password and username is equal
                     if (inName.equals(username) && inPassword.equals(password)) {
                         // recreate object
@@ -235,7 +243,7 @@ class LoginState extends ViewState {
                         String workNumber = employeeData[5];
                         String name = employeeData[6];
                         String address = employeeData[7];
-//                        System.out.println(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",username, password, id, isManager, salary, workNumber, name, address)); testing
+//                        System.out.println(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",username, password, id, isManager, salary, workNumber, name, address)); // testing
                         return new TravelAgencyEmployee(
                             username,
                             password,
@@ -415,7 +423,7 @@ class LoginState extends ViewState {
         // only creates the manager and employee loging if the file is empty
         if (count < 1){
             try {
-            //    System.out.println("POPPING OFF!");
+//                System.out.println("POPPING OFF!");
                 // Saves manager and employee account to accounts
                 BufferedWriter writer = new BufferedWriter(new FileWriter("src/joaquinbarreram3/employeeAccounts.txt", true));
                 TravelAgencyEmployee emp = new TravelAgencyEmployee(
@@ -498,14 +506,6 @@ class LoginState extends ViewState {
                     2
             ));
 //            Lodging.allLodgings.add(new Home("Big Home", 10.61, 2));
-            
-            writer.close();
-        } catch (IOException ex) {
-            System.out.println("NOT POPPING OFF");
-            Logger.getLogger(Lodging.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        }
-        
         // Adds the default lodges into array if the array is empty
         if (Lodging.allLodgings.size() < 1){
             Lodging.allLodgings.add(new Hotel("4 seasons", 20, 83, 9.0, 12));
@@ -513,7 +513,16 @@ class LoginState extends ViewState {
             Lodging.allLodgings.add(new Home("Blue House", 12.1, 812));
             Lodging.allLodgings.add(new Home("Mansion", 21.23, 3));
             Lodging.allLodgings.add(new Home("Big Home", 10.61, 2));
+//            System.out.println("RUNNING IN IF STATEMENT IN LOGINSTATE ARRAY SIZE LODGE: " + Lodging.allLodgings.size());
         }
+            writer.close();
+        } catch (IOException ex) {
+            System.out.println("NOT POPPING OFF");
+            Logger.getLogger(Lodging.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        }
+        
+
         try {
             // Load customers from file
             BufferedReader customerReader = new BufferedReader(new FileReader("src/joaquinbarreram3/customerAccounts.txt"));
@@ -569,7 +578,7 @@ class LoginState extends ViewState {
                 }
             }
             employeeReader.close();
-            System.out.println("Data loaded successfully!");
+//            System.out.println("Data loaded successfully!");
         } catch (IOException ex) {
             Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Error loading data: " + ex.getMessage());

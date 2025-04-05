@@ -15,6 +15,7 @@ public class EmployeeViewState extends ViewState {
     public EmployeeViewState(TravelAgencyEmployee inEmployee, LoginState inLState){
         this.currEmployee = inEmployee;
         this.lstate = inLState;
+        load(); // ensures all existing lodges are loaded in
     }
     public void editLodge() {
         System.out.println("Select a lodging to edit:");
@@ -99,7 +100,9 @@ public class EmployeeViewState extends ViewState {
         int rChoice = Integer.parseInt(sc.nextLine());
         if (rChoice > 0 && rChoice <= Lodging.allLodgings.size()) {
             System.out.println(Lodging.allLodgings.get(rChoice - 1).name + " removed successfully");
+//            System.out.println("ARRAY SIZE BEFORE: " + Lodging.allLodgings.size());
             Lodging.allLodgings.remove(rChoice - 1);
+//            System.out.println("ARRAY SIZE AFTER: " + Lodging.allLodgings.size());
         // Update file, to remove text
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter("src\\joaquinbarreram3\\lodgingInfo.txt"));
@@ -127,6 +130,7 @@ public class EmployeeViewState extends ViewState {
                     writer.newLine();
                 }
             }
+//            System.out.println("ARRAY SIZE TRY CATCH REMOVE: " + Lodging.allLodgings.size());
             writer.close();
         } catch (IOException ex) {
             System.out.println("Error updating file: " + ex.getMessage());
@@ -176,6 +180,9 @@ public class EmployeeViewState extends ViewState {
                                 String name = sc.nextLine();
                                 Home house = new Home(name,cost, bedrooms);
                                 house.registerLodging();
+//                                System.out.println("ARRAY SIZE BEFORE: " + Lodging.allLodgings.size());
+                                Lodging.allLodgings.add(house);
+//                                System.out.println("ARRAY SIZE AFTER: " + Lodging.allLodgings.size());
                                 System.out.println("Home added successfully!");
                                 break;
                             }
@@ -194,6 +201,9 @@ public class EmployeeViewState extends ViewState {
                                 String name = sc.nextLine();
                                 Hotel hotel = new Hotel(name,vacancies, bedrooms, basePrice, maxOccupants);
                                 hotel.registerLodging();
+//                                System.out.println("ARRAY SIZE AFTER: " + Lodging.allLodgings.size());
+                                Lodging.allLodgings.add(hotel);
+//                                System.out.println("ARRAY SIZE AFTER: " + Lodging.allLodgings.size());
                                 System.out.println("Hotel added successfully!");
                                 break;
                             }
@@ -247,6 +257,7 @@ public class EmployeeViewState extends ViewState {
                             String name = sc.nextLine();
                             Home house = new Home(name,cost, bedrooms);
                             house.registerLodging();
+                            Lodging.allLodgings.add(house);
                             System.out.println("Home added successfully!");
                         } else if (sOption.equals("2")) {
                             // Add Hotel
@@ -262,6 +273,7 @@ public class EmployeeViewState extends ViewState {
                             String name = sc.nextLine();
                             Hotel hotel = new Hotel(name,vacancies, bedrooms, basePrice, maxOccupants);
                             hotel.registerLodging();
+                            Lodging.allLodgings.add(hotel);
                             System.out.println("Hotel added successfully!");
                         } else {
                             System.out.println("Invalid option");

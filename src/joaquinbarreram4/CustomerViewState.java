@@ -4,10 +4,8 @@ package joaquinbarreram4;
 import java.util.*;
 import java.util.GregorianCalendar;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.*;
 import java.time.*;
-import java.time.temporal.ChronoUnit;
 import javax.swing.*;
 
 public class CustomerViewState extends ViewState {
@@ -18,10 +16,9 @@ public class CustomerViewState extends ViewState {
     private JComboBox<String> startMonth, startDay, startYear;
     private JComboBox<String> endMonth, endDay, endYear;
     private JLabel thumbnailLabel;
-    private JPanel thumbnailFrame;
+    private JetSettersButton confirmBtn = new JetSettersButton("Confirm Order");
+    private JetSettersButton cancelBtn = new JetSettersButton("Cancel Order");;
     // Objects
-    Scanner sc = new Scanner(System.in);
-    Lodging lodgeOrder = null;
     Customer currCustomer = new Customer();
     LoginState lState;
     
@@ -127,6 +124,10 @@ public class CustomerViewState extends ViewState {
         // Buttons row
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
         buttonPanel.setOpaque(false);
+        confirmBtn.setVisible(false);
+        cancelBtn.setVisible(false);
+        buttonPanel.add(confirmBtn);
+        buttonPanel.add(cancelBtn);
         
         // Inside the constructor where buttons are initialized
         JetSettersButton viewDetailsBtn = new JetSettersButton("View Lodge Details");
@@ -172,13 +173,34 @@ public class CustomerViewState extends ViewState {
                 if (startDate.isAfter(endDate)) {
                     lodgeDetails.setText("Start date cannot be after end date.");
                     return; // Exit the event handler if the dates are invalid
+                } else if (startDate.equals(endDate)){
+                    lodgeDetails.setText("Start date cannot be equal to end date.");
+                    return;
                 }
+                
         
                 // Proceed with purchasing the lodge
-                Lodging selectedLodge = Lodging.allLodgings.get(selectedIndex);
-        
-                System.out.println(String.format("Purchased Lodge:\n %s |\n From date: %s |\n To date: %s | \n INDEX: %s", selectedLodge.getDetailsString(), startDate, endDate, selectedIndex));
-        
+//                Lodging selectedLodge = Lodging.allLodgings.get(selectedIndex);
+//                System.out.println(String.format("Purchased Lodge:\n %s |\n From date: %s |\n To date: %s | \n INDEX: %s", selectedLodge.getDetailsString(), startDate, endDate, selectedIndex));
+                lodgeDetails.setText("Added to Cart!");
+                // now reveal Confirm / Cancel
+                confirmBtn.setVisible(true);
+                cancelBtn .setVisible(true);
+
+                // force Swing to redo layout
+                panel.revalidate();
+                panel.repaint();
+                confirmBtn.addActionListener(a -> {
+                    // process the order...
+                    lodgeDetails.setText("Order confirmed!");
+                    confirmBtn.setVisible(false);
+                    cancelBtn .setVisible(false);
+                });
+                cancelBtn.addActionListener(a -> {
+                    lodgeDetails.setText("Order canceled.");
+                    confirmBtn.setVisible(false);
+                    cancelBtn .setVisible(false);
+                });
             } else {
                 lodgeDetails.setText("No lodge selected.");
             }
@@ -337,7 +359,6 @@ public class CustomerViewState extends ViewState {
     @Override
     void update() {
 //        System.out.println("customers array list on signout is: " + lState.customers.size());
-        
     }
     @Override
     public void load() {

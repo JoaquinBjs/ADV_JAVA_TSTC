@@ -1,19 +1,13 @@
 package joaquinbarreram4;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 public final class EmployeeViewState extends ViewState {
     // is running boolean for the update method
-    private boolean isRunning = true;
-    /*
-        Add drop box
-    display selected, and then delete, validation if none
-    */
+
     // Employee components
     // house form fields
     private JTextField houseCostField;
@@ -36,13 +30,10 @@ public final class EmployeeViewState extends ViewState {
     private JetSettersTextArea lodgeDetails = new JetSettersTextArea(0,0);
     private JPanel lcPanel;
     private CardLayout lcLayout = new CardLayout();;
-    private JPanel employeeFormPanel;
-    private JLabel employeeTitleLabel;
     JPanel formFieldHotel = hotelEdit();
     JPanel formFieldHouse = houseEdit();
     // Objects
     Scanner sc = new Scanner(System.in);
-    String eOption = null;
     TravelAgencyEmployee currEmployee = null;
     LoginState lstate;
     // Constructor to hold the logged in employee
@@ -130,7 +121,11 @@ public final class EmployeeViewState extends ViewState {
             lcPanel.add(removePanel, "REMOVE");
             lcLayout.show(lcPanel, "REMOVE");
         });
-        listBtn.addActionListener(e ->{});
+        listBtn.addActionListener(e ->{
+            listPanel = displayLodges();
+            lcPanel.add(listPanel, "LIST");
+            lcLayout.show(lcPanel, "LIST");
+        });
         editBtn.addActionListener(e -> {
             editPanel = makeEditForm();
             lcPanel.add(editPanel, "EDIT");
@@ -145,6 +140,81 @@ public final class EmployeeViewState extends ViewState {
         });
        
         contentPane.add(buttonPane, BorderLayout.SOUTH);
+    }
+    public JPanel displayLodges(){
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(new Color(152, 172, 173));
+        panel.setPreferredSize(new Dimension(800, 400));
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        // Content panel using GBC
+        JPanel contentPane = new JPanel(new GridBagLayout());
+        contentPane.setBackground(new Color(249, 249, 255));
+        contentPane.setPreferredSize(new Dimension(600, 300));
+        contentPane.setBorder(BorderFactory.createLineBorder(new Color(249, 249, 255), 4, true));
+
+        // Label and ComboBox
+        JLabel lodgeLabel = new JLabel("Select Lodge:");
+        lodgeLabel.setForeground(Color.WHITE); 
+        lodgeList = new JComboBox<>();
+        for (Lodging i : Lodging.allLodgings) {
+            lodgeList.addItem(i.name);
+        }
+
+        // text field
+        JScrollPane scroll = new JScrollPane(lodgeDetails);
+        scroll.setBackground(new Color(152,172,173));
+       
+        scroll.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        scroll.setOpaque(false);
+        
+        // Display lodging
+            lodgeList.addActionListener(e -> {
+            int selectedIndex = lodgeList.getSelectedIndex();
+            if (selectedIndex >= 0 && selectedIndex < Lodging.allLodgings.size()) {
+                Lodging selectedLodge = Lodging.allLodgings.get(selectedIndex);
+                lodgeDetails.setText(selectedLodge.getDetailsString());
+                lodgeDetails.setCaretPosition(0);
+            } else {
+                lodgeDetails.setText("No lodge selected.");
+            }
+        });
+
+        // For lodgeLabel
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.weightx = 2;
+        gbc.weighty = 0;
+        gbc.anchor = GridBagConstraints.NORTHEAST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        contentPane.add(lodgeLabel, gbc);
+        
+        // For drop box
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weightx = 1;
+        gbc.anchor = GridBagConstraints.NORTHEAST;
+        contentPane.add(lodgeList, gbc);
+        
+        // For text field
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        contentPane.add(scroll, gbc);
+
+        // Use GBC on panel
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        panel.add(contentPane, gbc);
+        
+        return panel;
     }
     public JPanel removeLodgePanel ()  {
         JPanel panel = new JPanel(new GridBagLayout());
@@ -306,14 +376,6 @@ public final class EmployeeViewState extends ViewState {
         
         // Add bottom pane to content pane
         contentPane.add(bottomPane, BorderLayout.SOUTH);
-        
-//        // House Panel
-//        JPanel houseInputPanel = makeHouseForm();
-//        contentPane.add(houseInputPanel, BorderLayout.CENTER);
-//
-//        // Hotel Panel
-//        JPanel hotelInputPanel = makeHotelForm();
-//        contentPane.add(hotelInputPanel, BorderLayout.CENTER);
         
         // House and Hotel card
         JPanel formCards = new JPanel(new CardLayout());
@@ -625,12 +687,15 @@ public final class EmployeeViewState extends ViewState {
         
         // event listener
         edit.addActionListener(e -> {
+            contentPane.remove(formFieldHotel);
+            contentPane.remove(formFieldHouse);
+            formFieldHouse = houseEdit();
+            formFieldHotel = hotelEdit();
+
 //            System.out.println("EDIT BUTTON POPPING OFF!");
             int selectedIndex = lodgeList.getSelectedIndex();
             if (selectedIndex >= 0 && selectedIndex < Lodging.allLodgings.size()) {
                 Lodging selectedLodge = Lodging.allLodgings.get(selectedIndex);
-                contentPane.remove(formFieldHotel);
-                contentPane.remove(formFieldHouse);
                 if (selectedLodge instanceof Hotel){
                     contentPane.add(formFieldHotel, BorderLayout.CENTER);
                     hotelPop((Hotel) selectedLodge);
@@ -736,11 +801,13 @@ public final class EmployeeViewState extends ViewState {
         // Status label
         JetSettersLabel statusLabel = new JetSettersLabel(" ");
         statusLabel.setFont(new Font("Dialog", Font.BOLD, 12));
-        formFields.add(statusLabel);        
         statusLabel.setVisible(false);
+        statusLabel.setText(" ");
+        formFields.add(statusLabel);
+
         
         //  BUTTON WITH EVENT LISTENER
-        JetSettersButton submitHouseBtn = new JetSettersButton("Submit Hotel");
+        JetSettersButton submitHouseBtn = new JetSettersButton("Submit LODGE");
         submitHouseBtn.addActionListener(e -> {
             try {
                 statusLabel.setVisible(false);
@@ -763,7 +830,7 @@ public final class EmployeeViewState extends ViewState {
                         selectedHouse.name = name;
                         save();
                     }
-                    statusLabel.setText("Hotel updated successfully!");
+                    statusLabel.setText("LODGE updated successfully!");
                     statusLabel.setForeground(Color.BLACK);
                     statusLabel.setVisible(true);
                 }
@@ -880,7 +947,7 @@ public final class EmployeeViewState extends ViewState {
         innerGbc.insets = new Insets(20,10,10,10);
         innerGbc.gridy = 5;
         formFields.add(bottomP, innerGbc);        
-        statusLabel.setVisible(false);
+//        statusLabel.setVisible(false);
         // Submit button with even listner
         JetSettersButton submitHotelBtn = new JetSettersButton("Submit Hotel");
         submitHotelBtn.addActionListener(e -> {
@@ -1071,110 +1138,7 @@ public final class EmployeeViewState extends ViewState {
 
     @Override
     void update() {
-        System.out.println("UPDATE METHOD IS CALLED IN EMPLOYEEE VIEW STATE");
-//        while (isRunning) {
-//            enter();
-//            if (!currEmployee.isAManager) {
-//                System.out.println("Select an option (1-5): ");
-//                eOption = sc.nextLine();
-//                switch (eOption) {
-//                    case "1":
-//                        System.out.println("=======================");
-//                        System.out.println("Select type of Lodging");
-//                        System.out.println("1. Home");
-//                        System.out.println("2. Hotel");
-//                        System.out.println("=======================");
-//                        String sOption = sc.nextLine();
-//                    switch (sOption) {
-//                        case "1":
-//                        case "2":
-//                    case "2":
-//                        // Remove Lodge
-//                        removeLodge();
-//                        break;
-//                    case "3":
-//                        // List Lodges
-//                        Lodging.displayAllLodging();
-////                        System.out.println("Running"); testing
-//                        break;
-//                    case "4":
-//                        // Edit Lodging
-//                        editLodge();
-//                        break;
-//                    case "5":
-//                        // Log out
-//                        isRunning = false;
-//                        currEmployee = null;
-//                        break;
-//                    default:
-//                        System.out.println("Invalid option");
-//                        break;
-//                }
-//            } else {
-//                System.out.println("Select an option (1-6): ");
-//                eOption = sc.nextLine();
-//                switch (eOption) {
-//                    case "1":
-//                        // Add Lodge (same as above)
-//                        System.out.println("=======================");
-//                        System.out.println("Select type of Lodging");
-//                        System.out.println("1. Home");
-//                        System.out.println("2. Hotel");
-//                        System.out.println("=======================");
-//                        String sOption = sc.nextLine();
-//                        if (sOption.equals("1")) {
-
-//                        } else if (sOption.equals("2")) {
-//                            // Add Hotel
-//                            System.out.println("Enter vacancies: ");
-//                            int vacancies = Integer.parseInt(sc.nextLine());
-//                            System.out.println("Enter number of bedrooms: ");
-//                            int bedrooms = Integer.parseInt(sc.nextLine());
-//                            System.out.println("Enter base price per night: ");
-//                            double basePrice = Double.parseDouble(sc.nextLine());
-//                            System.out.println("Enter max occupants: ");
-//                            int maxOccupants = Integer.parseInt(sc.nextLine());
-//                            System.out.println("Enter name: ");
-//                            String name = sc.nextLine();
-//                            Hotel hotel = new Hotel(name,vacancies, bedrooms, basePrice, maxOccupants);
-//                            hotel.registerLodging();
-//                            Lodging.allLodgings.add(hotel);
-//                            System.out.println("Hotel added successfully!");
-//                        } else {
-//                            System.out.println("Invalid option");
-//                        }
-//                        break;
-//                    case "2":
-//                        // Remove Lodge (same as above)
-//                        removeLodge();
-//                        break;
-//                    case "3":
-//                        // List Lodges
-//                        Lodging.displayAllLodging();
-//                        break;
-//                    case "4":
-//                        // Edit Lodges
-//                        editLodge();
-//                        break;
-//                    case "5":
-//                        // Log out
-//                        isRunning = false;
-//                        currEmployee = null;
-//                        System.out.println("Logging out");
-//                        LoginState loginView = new LoginState();
-//                        loginView.update();
-//                        break;
-//                    case "6":
-//                        // Switch to Manager View
-//                        ManagerViewState mView = new ManagerViewState(this.currEmployee, this.lstate);
-//                        mView.update();
-//                        break;
-//                    default:
-//                        System.out.println("Invalid option");
-//                        break;
-//                }
-//            }
-//        }
+        // Not needed
     }
     @Override
     public void load() {

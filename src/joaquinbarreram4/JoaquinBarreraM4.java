@@ -14,13 +14,14 @@ public class JoaquinBarreraM4 {
     public static void main(String[] args) {
         ViewState.initializeFrame();
 //        
-        JFrame testFrame = new JFrame("Test ADD LODGE PANEL View");
-        testFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        EmployeeViewState empView = new EmployeeViewState(null, null);
-        testFrame.add(empView.makeEditForm());
-        testFrame.pack();
-        testFrame.setLocationRelativeTo(null);
-        testFrame.setVisible(true);
+//        JFrame testFrame = new JFrame("Test ADD LODGE PANEL View");
+//        testFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        LoginState lS = new LoginState();
+//        EmployeeViewState cView = new EmployeeViewState(null,null);
+//        testFrame.add(cView.makeEditForm());
+//        testFrame.pack();
+//        testFrame.setLocationRelativeTo(null);
+//        testFrame.setVisible(true);
 //        
         // Initialize all states
         LoginState loginState = new LoginState();

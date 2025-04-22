@@ -1,4 +1,5 @@
 package joaquinbarreram4;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -6,6 +7,7 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 class LoginState extends ViewState {
     // main panel
     private JPanel panel;
@@ -14,25 +16,22 @@ class LoginState extends ViewState {
     private JPanel registrationPanel;
 
     // Login components
+    private JetSettersLabel status;
+    private JetSettersLabel statusR;
     private JPanel loginFormPanel;
     private JTextField loginNameField;
     private JPasswordField loginPField;
-    private JLabel loginStatusLabel;
     private JetSettersLabel loginTitleLabel;
     private JetSettersButton loginBtn, registerBtn, guestBtn, exitBtn;
-    
-    Scanner scan = new Scanner(System.in);
-    String option = null;
+
     String inName = null;
     String inPassword = null;
     public static ArrayList<Customer> customers = new ArrayList<>();
     public static ArrayList<TravelAgencyEmployee> employees = new ArrayList<>();
     final int REQUIRED_LENGTH = 9;
-    private boolean isRunning = true;
     int count = 0;
     int lCount = 0;
-//    boolean isEmployee = false;
-    
+    private boolean isValid = false;
     public LoginState(){
         panel = new JPanel(new BorderLayout());
         lcLayout = new CardLayout();
@@ -66,7 +65,14 @@ class LoginState extends ViewState {
         contentPane.setBackground(new Color(45, 81, 78)); 
         contentPane.setPreferredSize(new Dimension(885, 485));
         contentPane.setBorder(BorderFactory.createLineBorder(new Color(39,69,67), 4, true));
-    
+        
+        // Status Label
+        status = new JetSettersLabel(" ");
+        status.setFont(new Font("Dialog", Font.BOLD, 12));
+        status.setForeground(new Color(249, 249, 255));
+        status.setVisible(false);
+        contentPane.add(status, BorderLayout.NORTH);
+        
         // Add contentPane to loginFormPanel
         gbc.gridy++;
         loginFormPanel.add(contentPane, gbc);
@@ -121,12 +127,16 @@ class LoginState extends ViewState {
             System.exit(0);
         });
         registerBtn.addActionListener(e -> {
+            loginNameField.setText("");
+            loginPField.setText("");
             System.out.println("Register popping off!");
             createRegristrationPanel();
         });
         guestBtn.addActionListener(e -> {
 //            System.out.println("Guest popping off!");
             // Add the CustomerViewState panel to the CardLayout container
+            loginNameField.setText("");
+            loginPField.setText("");
             CustomerViewState cView = new CustomerViewState(new Customer(), this);
             ViewState.addState("CustomerView", cView);    // ✅ adds to the right layout
             ViewState.showState("CustomerView");      
@@ -137,6 +147,13 @@ class LoginState extends ViewState {
         loginBtn.addActionListener(e -> {
 //            System.out.println("Login Popping off!");
             login();
+            if (!isValid){
+                System.out.println("Invalid username or password");
+                status.setText("Invalid username or password");
+                status.setVisible(true);
+            } else{
+                status.setVisible(false);
+            }
         });
         // Add to contentPane with BorderLayout
         contentPane.add(formFields, BorderLayout.CENTER);
@@ -175,7 +192,15 @@ class LoginState extends ViewState {
         GridBagConstraints fGbc = new GridBagConstraints();
         fGbc.insets = new Insets(10, 10, 10, 10);
         fGbc.fill = GridBagConstraints.HORIZONTAL;
-    
+        
+        // Status
+        statusR = new JetSettersLabel(" ");
+        statusR.setFont(new Font("Dialog", Font.BOLD, 12));
+        statusR.setForeground(new Color(249, 249, 255));
+        statusR.setVisible(false);
+        fGbc.gridy = 5;
+        formPanel.add(statusR, fGbc);
+        
         // Username
         JLabel userLabel = new JLabel("Username:");
         userLabel.setForeground(Color.WHITE);
@@ -306,19 +331,19 @@ class LoginState extends ViewState {
             String password = new String(passwordField.getPassword());
         
             if (username.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(panel, "Username and password cannot be empty.");
+                statusR.setText("Either field cannot be empty");
+                statusR.setVisible(true);
                 return;
             }
         
             if (!signUp(username, password)) {
-                JOptionPane.showMessageDialog(panel,
-                    "Username may already exist or password is not valid.\n" +
-                    "Password must be at least 9 characters, contain a special character, and an uppercase letter.");
+                statusR.setText("Both fields are invalid");
+                statusR.setVisible(true);
                 return;
             }
-        
-            JOptionPane.showMessageDialog(panel, "Account created successfully!");
-            lcLayout.show(lcPanel, "LoginForm");
+            statusR.setText("Account created sucessfully");
+            statusR.setVisible(true);
+//            lcLayout.show(lcPanel, "LoginForm");
         });
     
         // Add form and button panel to content pane
@@ -564,10 +589,10 @@ class LoginState extends ViewState {
     public void login() {
 //        System.out.println("Enter username: ");
         inName = loginNameField.getText();
-        System.out.println(String.format("Name: %s", inName));
+//        System.out.println(String.format("Name: %s", inName));
 //        System.out.println("Enter password: ");
         inPassword = loginPField.getText();
-        System.out.println(String.format("Password: %s", inPassword));
+//        System.out.println(String.format("Password: %s", inPassword));
         
         Customer loggedInCustomer = cMatches();
         TravelAgencyEmployee loggedInEmployee = eOMatches();
@@ -585,6 +610,8 @@ class LoginState extends ViewState {
                 ManagerViewState mView = new ManagerViewState(loggedInEmployee, this); // This is getting the loginstate
                 mView.update();
             } else {
+                loginNameField.setText("");
+                loginPField.setText("");
                 EmployeeViewState eView = new EmployeeViewState(loggedInEmployee, this); // This is getting loginstate 
                 ViewState.addState("EmployeeView", eView);
                 ViewState.showState("EmployeeView");
@@ -599,7 +626,8 @@ class LoginState extends ViewState {
     
 
         } else {
-            System.out.println("Invalid username or password");
+//            System.out.println("Invalid username or password");
+            isValid = false;
         }
     }
 
@@ -617,34 +645,6 @@ class LoginState extends ViewState {
 
     @Override
     void update() {
-//        // load data
-//        load();
-//        while (isRunning) {
-//            enter();
-//            option = scan.nextLine();
-//            switch (option) {
-//                case "1":
-//                    login();
-//                    break;
-//                case "2":
-////                    signUp();
-//                    break;
-//                case "3":
-//                    System.out.println("Continuing as a guest");
-////                    System.out.println("ARRAY SIZE: " + Lodging.allLodgings.size());
-//                    CustomerViewState cView = new CustomerViewState(null, this);
-//                    cView.update();
-//                    break;
-//                case "4":
-//                    System.out.println("Exiting program");
-//                    isRunning = false;
-//                    System.exit(0);
-//                    break;
-//                default:
-//                    System.out.println("Invalid option");
-//                    break;
-//            }
-//        }
     }
     @Override
     public void save() {

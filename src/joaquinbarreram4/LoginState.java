@@ -588,10 +588,10 @@ class LoginState extends ViewState {
     
     public void login() {
 //        System.out.println("Enter username: ");
-        inName = loginNameField.getText();
+        inName = loginNameField.getText().trim();
 //        System.out.println(String.format("Name: %s", inName));
 //        System.out.println("Enter password: ");
-        inPassword = loginPField.getText();
+        inPassword = new String(loginPField.getPassword()).trim();
 //        System.out.println(String.format("Password: %s", inPassword));
         
         Customer loggedInCustomer = cMatches();
@@ -607,8 +607,9 @@ class LoginState extends ViewState {
             if (loggedInEmployee.isAManager) {
 //                System.out.println("ARRAY SIZE: " + Lodging.allLodgings.size());
 //                System.out.println("customers array size when manager logs in is: " + customers.size());
-                ManagerViewState mView = new ManagerViewState(loggedInEmployee, this); // This is getting the loginstate
-                mView.update();
+                EmployeeViewState eView = new EmployeeViewState(loggedInEmployee, this); // This is getting loginstate 
+                ViewState.addState("EmployeeView", eView);
+                ViewState.showState("EmployeeView");
             } else {
                 loginNameField.setText("");
                 loginPField.setText("");

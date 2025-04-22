@@ -830,6 +830,10 @@ public final class EmployeeViewState extends ViewState {
                         selectedHouse.name = name;
                         save();
                     }
+                    lodgeList.removeAllItems();
+                    for (Lodging l : Lodging.allLodgings) {
+                        lodgeList.addItem(l.name);
+                    }
                     statusLabel.setText("LODGE updated successfully!");
                     statusLabel.setForeground(Color.BLACK);
                     statusLabel.setVisible(true);

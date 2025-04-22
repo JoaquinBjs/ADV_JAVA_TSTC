@@ -11,10 +11,11 @@ class LoginState extends ViewState {
     private JPanel panel;
     private JPanel lcPanel;
     private CardLayout lcLayout;
+    private JPanel registrationPanel;
 
     // Login components
     private JPanel loginFormPanel;
-    private JTextField loginNameBox;
+    private JTextField loginNameField;
     private JPasswordField loginPField;
     private JLabel loginStatusLabel;
     private JetSettersLabel loginTitleLabel;
@@ -43,6 +44,7 @@ class LoginState extends ViewState {
     
     // Create a login form method
     public void loginFormPanel(){
+        load();
         loginFormPanel = new JPanel(new GridBagLayout());
         loginFormPanel.setBackground(new Color(19, 46, 50));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -84,9 +86,9 @@ class LoginState extends ViewState {
         innerGbc.gridy = 0;
         formFields.add(nameLabel, innerGbc);
     
-        loginNameBox = new JTextField(30);
+        loginNameField = new JTextField(30);
         innerGbc.gridx = 1;
-        formFields.add(loginNameBox, innerGbc);
+        formFields.add(loginNameField, innerGbc);
     
         // Password
         JLabel passwordLabel = new JLabel("Password: ");
@@ -103,6 +105,7 @@ class LoginState extends ViewState {
         // Button Panel
         JPanel buttonPane = new JPanel();
         buttonPane.setBackground(new Color(19, 46, 50));
+        
         loginBtn = new JetSettersButton("Login");
         registerBtn = new JetSettersButton("Register");
         guestBtn = new JetSettersButton("Continue as Guest");
@@ -111,6 +114,7 @@ class LoginState extends ViewState {
         buttonPane.add(registerBtn);
         buttonPane.add(guestBtn);
         buttonPane.add(exitBtn);
+        
 
         // Event listeners
         exitBtn.addActionListener(e -> {
@@ -118,6 +122,7 @@ class LoginState extends ViewState {
         });
         registerBtn.addActionListener(e -> {
             System.out.println("Register popping off!");
+            createRegristrationPanel();
         });
         guestBtn.addActionListener(e -> {
 //            System.out.println("Guest popping off!");
@@ -131,31 +136,223 @@ class LoginState extends ViewState {
         });
         loginBtn.addActionListener(e -> {
 //            System.out.println("Login Popping off!");
+            login();
         });
         // Add to contentPane with BorderLayout
         contentPane.add(formFields, BorderLayout.CENTER);
         contentPane.add(buttonPane, BorderLayout.SOUTH);
     }
-    public boolean validation() {
-        boolean maxLength = true;   
+    
+    private void createRegristrationPanel() {
+        registrationPanel = new JPanel(new GridBagLayout());
+        registrationPanel.setBackground(new Color(45, 81, 78));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(15, 15, 15, 15);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+    
+        // Title label
+        JLabel regTitle = new JLabel("Registration Form");
+        regTitle.setFont(new Font("Dialog", Font.BOLD, 28));
+        regTitle.setForeground(Color.WHITE);
+        regTitle.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        registrationPanel.add(regTitle, gbc);
+    
+        // Content panel
+        JPanel contentPane = new JPanel(new BorderLayout());
+        contentPane.setBackground(new Color(19, 46, 50));
+        contentPane.setPreferredSize(new Dimension(700, 400));
+        contentPane.setBorder(BorderFactory.createLineBorder(new Color(39, 69, 67), 4, true));
+    
+        gbc.gridy++;
+        registrationPanel.add(contentPane, gbc);
+    
+        // Form panel inside content
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setOpaque(false);
+        GridBagConstraints fGbc = new GridBagConstraints();
+        fGbc.insets = new Insets(10, 10, 10, 10);
+        fGbc.fill = GridBagConstraints.HORIZONTAL;
+    
+        // Username
+        JLabel userLabel = new JLabel("Username:");
+        userLabel.setForeground(Color.WHITE);
+        userLabel.setFont(new Font("Dialog", Font.BOLD, 18));
+        fGbc.gridx = 0;
+        fGbc.gridy = 0;
+        formPanel.add(userLabel, fGbc);
+    
+        JTextField usernameField = new JTextField(25);
+        fGbc.gridx = 1;
+        formPanel.add(usernameField, fGbc);
+    
+        // Password
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setForeground(Color.WHITE);
+        passLabel.setFont(new Font("Dialog", Font.BOLD, 18));
+        fGbc.gridx = 0;
+        fGbc.gridy = 1;
+        formPanel.add(passLabel, fGbc);
+    
+        JPasswordField passwordField = new JPasswordField(25);
+        fGbc.gridx = 1;
+        formPanel.add(passwordField, fGbc);
+    
+        // Password indicators
+        JLabel lengthIndicator = new JLabel("Length (≥ 9): ❌");
+        JLabel specialCharIndicator = new JLabel("Symbols: ❌");
+        JLabel uppercaseIndicator = new JLabel("Uppercase Letter (A-Z): ❌");
+        JLabel numIndicator = new JLabel("Has Number: ❌");
+        uppercaseIndicator.setForeground(new Color(249,249,255));
+        numIndicator.setForeground(new Color(249,249,255));
+        lengthIndicator.setForeground(new Color(249,249,255));
+        specialCharIndicator.setForeground(new Color(249,249,255));
+        fGbc.gridy++;
+        formPanel.add(numIndicator, fGbc);
+        fGbc.gridy++;
+        
+        formPanel.add(uppercaseIndicator, fGbc);
+        fGbc.gridx = 0;
+        fGbc.gridy = 2;
+        fGbc.gridwidth = 2;
+        formPanel.add(lengthIndicator, fGbc);
+        fGbc.gridy++;
+        
+        formPanel.add(specialCharIndicator, fGbc);
+
+        // Real-time password checking
+        passwordField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                char[] input = passwordField.getPassword();
+                String pwd = new String(input);
+            
+                boolean hasUpper = false;
+                boolean hasSpecial = false;
+                boolean hasNumber = false;
+                boolean maxLength = false;
+            
+                if (pwd.length() >= REQUIRED_LENGTH) {
+                    maxLength = true;
+                }
+            
+                for (int i = 0; i < pwd.length(); i++) {
+                    char c = pwd.charAt(i);
+                    if (Character.isUpperCase(c)) {
+                        hasUpper = true;
+                    }
+                    if (!Character.isLetterOrDigit(c)) {
+                        hasSpecial = true;
+                    }
+                    if (Character.isDigit(c)) {
+                        hasNumber = true;
+                    }
+                }
+            
+                // Length
+                if (maxLength) {
+                    lengthIndicator.setText("Length (≥ 9): ✔️");
+                    lengthIndicator.setForeground(new Color(0, 204, 102));
+                } else {
+                    lengthIndicator.setText("Length (≥ 9): ❌");
+                    lengthIndicator.setForeground(Color.RED);
+                }
+            
+                // Special character
+                if (hasSpecial) {
+                    specialCharIndicator.setText("Symbol: ✔️");
+                    specialCharIndicator.setForeground(new Color(0, 204, 102));
+                } else {
+                    specialCharIndicator.setText("Symbol: ❌");
+                    specialCharIndicator.setForeground(Color.RED);
+                }
+            
+                // Uppercase
+                if (hasUpper) {
+                    uppercaseIndicator.setText("Uppercase Letter (A-Z): ✔️");
+                    uppercaseIndicator.setForeground(new Color(0, 204, 102));
+                } else {
+                    uppercaseIndicator.setText("Uppercase Letter (A-Z): ❌");
+                    uppercaseIndicator.setForeground(Color.RED);
+                }
+            
+                // Number
+                if (hasNumber) {
+                    numIndicator.setText("Number (0-9): ✔️");
+                    numIndicator.setForeground(new Color(0, 204, 102));
+                } else {
+                    numIndicator.setText("Number (0-9): ❌");
+                    numIndicator.setForeground(Color.RED);
+                }
+            }
+        });
+
+        // Button Panel
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(new Color(19, 46, 50));
+        JetSettersButton createBtn = new JetSettersButton("Create Account");
+        JetSettersButton backBtn = new JetSettersButton("Back to Login");
+        buttonPanel.add(createBtn);
+        buttonPanel.add(backBtn);
+
+    
+        // Add listeners
+        backBtn.addActionListener(e -> lcLayout.show(lcPanel, "LoginForm"));
+    
+        createBtn.addActionListener(e -> {
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+        
+            if (username.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(panel, "Username and password cannot be empty.");
+                return;
+            }
+        
+            if (!signUp(username, password)) {
+                JOptionPane.showMessageDialog(panel,
+                    "Username may already exist or password is not valid.\n" +
+                    "Password must be at least 9 characters, contain a special character, and an uppercase letter.");
+                return;
+            }
+        
+            JOptionPane.showMessageDialog(panel, "Account created successfully!");
+            lcLayout.show(lcPanel, "LoginForm");
+        });
+    
+        // Add form and button panel to content pane
+        contentPane.add(formPanel, BorderLayout.CENTER);
+        contentPane.add(buttonPanel, BorderLayout.SOUTH);
+    
+        lcPanel.add(registrationPanel, "Registration");
+        lcLayout.show(lcPanel, "Registration");
+    }
+
+    private boolean validation() {
         boolean hasUpper = false;
         boolean hasSpecial = false;
-        if(inPassword.length() >= REQUIRED_LENGTH){
-            maxLength = true;        
-        }        
+        boolean hasNumber = false;
+        boolean maxLength = false;
+    
+        if (inPassword.length() >= REQUIRED_LENGTH) {
+            maxLength = true;
+        }
+    
         for (int i = 0; i < inPassword.length(); i++) {
-            if (Character.isUpperCase(inPassword.charAt(i))) {
+            char c = inPassword.charAt(i);
+            if (Character.isUpperCase(c)) {
                 hasUpper = true;
             }
-            if (!Character.isLetterOrDigit(inPassword.charAt(i))) {
+            if (!Character.isLetterOrDigit(c)) {
                 hasSpecial = true;
             }
+            if (Character.isDigit(c)) {
+                hasNumber = true;
+            }
         }
-        if(maxLength && hasUpper && hasSpecial){
-            return true;
-        } else{
-            return false;
-        }
+    
+        return maxLength && hasUpper && hasSpecial && hasNumber;
     }
     
     // Encrypt password method
@@ -232,71 +429,49 @@ class LoginState extends ViewState {
         
     }
     
-    public void signUp() {
-        System.out.println("Enter a new username: ");
-        inName = scan.nextLine();
-        
-        // checks if a name exists by reading through the file
+    public boolean signUp(String username, String password) {
+        // check if username exists
         boolean nameExists = false;
         try (BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram4/customerAccounts.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] lineData = line.split(",");
-                if (lineData.length > 0 && inName.equals(lineData[0])) {
+                if (lineData.length > 0 && username.equals(lineData[0])) {
                     nameExists = true;
                     break;
                 }
             }
         } catch (IOException ex) {
             Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         }
     
-        while (nameExists) {
-            System.out.println("Username already exists! Enter a new username: ");
-            inName = scan.nextLine();
-            nameExists = false;
-            try (BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram4/customerAccounts.txt"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] lineData = line.split(",");
-                    if (lineData.length > 0 && inName.equals(lineData[0])) {
-                        nameExists = true;
-                        break;
-                    }
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        if (nameExists) {
+            return false; // username taken
         }
     
-        System.out.println("Enter a password: ");
-        inPassword = scan.nextLine();
-        while (!validation()) {
-            System.out.println("Password must be at least 9 characters long, contain an uppercase letter, and a special character.");
-            System.out.println("Enter a valid password: ");
-            inPassword = scan.nextLine();
+        this.inName = username;
+        this.inPassword = password;
+    
+        if (!validation()) {
+            return false; // validation failed
         }
     
-        // Makes new id by counting existing customers + 1
         int newId = customers.size() + 1;
     
-        // Create new customer object (store unencrypted password in memory)
         Customer newCustomer = new Customer(
             inName,
-            inPassword,  // Store unencrypted in memory
+            inPassword,
             newId,
             0.0,
             inName,
             "Unknown"
         );
-        
-        // Add to customers ArrayList
+    
         customers.add(newCustomer);
-        
-        // Save to file (this will encrypt the password)
-        save();
-        
-        System.out.println("Account created!");
+        save(); // assumed to encrypt and save to file
+    
+        return true;
     }
     
     // Return the customer thst mstches if the, inputed name and password matches
@@ -387,10 +562,12 @@ class LoginState extends ViewState {
     }
     
     public void login() {
-        System.out.println("Enter username: ");
-        inName = scan.nextLine();
-        System.out.println("Enter password: ");
-        inPassword = scan.nextLine();
+//        System.out.println("Enter username: ");
+        inName = loginNameField.getText();
+        System.out.println(String.format("Name: %s", inName));
+//        System.out.println("Enter password: ");
+        inPassword = loginPField.getText();
+        System.out.println(String.format("Password: %s", inPassword));
         
         Customer loggedInCustomer = cMatches();
         TravelAgencyEmployee loggedInEmployee = eOMatches();
@@ -409,12 +586,17 @@ class LoginState extends ViewState {
                 mView.update();
             } else {
                 EmployeeViewState eView = new EmployeeViewState(loggedInEmployee, this); // This is getting loginstate 
-                eView.update();
+                ViewState.addState("EmployeeView", eView);
+                ViewState.showState("EmployeeView");
+//                eView.update();
+                
             }
         } else if (loggedInCustomer != null) { // If not an employee, check customers
             System.out.println("Login successful!");
             CustomerViewState cView = new CustomerViewState(loggedInCustomer, this);
-            cView.update();
+            ViewState.addState("CustomerView", cView);    // adds to the right layout
+            ViewState.showState("CustomerView");      
+    
 
         } else {
             System.out.println("Invalid username or password");
@@ -435,34 +617,34 @@ class LoginState extends ViewState {
 
     @Override
     void update() {
-        // load data
-        load();
-        while (isRunning) {
-            enter();
-            option = scan.nextLine();
-            switch (option) {
-                case "1":
-                    login();
-                    break;
-                case "2":
-                    signUp();
-                    break;
-                case "3":
-                    System.out.println("Continuing as a guest");
-//                    System.out.println("ARRAY SIZE: " + Lodging.allLodgings.size());
-                    CustomerViewState cView = new CustomerViewState(null, this);
-                    cView.update();
-                    break;
-                case "4":
-                    System.out.println("Exiting program");
-                    isRunning = false;
-                    System.exit(0);
-                    break;
-                default:
-                    System.out.println("Invalid option");
-                    break;
-            }
-        }
+//        // load data
+//        load();
+//        while (isRunning) {
+//            enter();
+//            option = scan.nextLine();
+//            switch (option) {
+//                case "1":
+//                    login();
+//                    break;
+//                case "2":
+////                    signUp();
+//                    break;
+//                case "3":
+//                    System.out.println("Continuing as a guest");
+////                    System.out.println("ARRAY SIZE: " + Lodging.allLodgings.size());
+//                    CustomerViewState cView = new CustomerViewState(null, this);
+//                    cView.update();
+//                    break;
+//                case "4":
+//                    System.out.println("Exiting program");
+//                    isRunning = false;
+//                    System.exit(0);
+//                    break;
+//                default:
+//                    System.out.println("Invalid option");
+//                    break;
+//            }
+//        }
     }
     @Override
     public void save() {

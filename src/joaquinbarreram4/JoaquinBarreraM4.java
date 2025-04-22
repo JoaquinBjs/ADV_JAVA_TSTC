@@ -7,10 +7,21 @@
 
 package joaquinbarreram4;
 
+import javax.swing.JFrame;
+
 
 public class JoaquinBarreraM4 {
     public static void main(String[] args) {
         ViewState.initializeFrame();
+//        
+        JFrame testFrame = new JFrame("Test ADD LODGE PANEL View");
+        testFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        EmployeeViewState empView = new EmployeeViewState(null, null);
+        testFrame.add(empView.makeEditForm());
+        testFrame.pack();
+        testFrame.setLocationRelativeTo(null);
+        testFrame.setVisible(true);
+//        
         // Initialize all states
         LoginState loginState = new LoginState();
         CustomerViewState customerState = new CustomerViewState(new Customer(), loginState);

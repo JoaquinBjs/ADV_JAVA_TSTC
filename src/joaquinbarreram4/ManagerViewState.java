@@ -3,6 +3,7 @@ import java.util.Scanner;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JPanel;
 
 class ManagerViewState extends ViewState {
     // Variables
@@ -232,5 +233,11 @@ class ManagerViewState extends ViewState {
             System.out.println("NOT POPPING OFF IN MANAGER VIEW STATE SAVE");
             Logger.getLogger(ManagerViewState.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @Override
+    public JPanel getPanel() {
+        // Nothing needed here
+        return null;
     }
 }

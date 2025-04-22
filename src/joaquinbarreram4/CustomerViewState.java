@@ -209,6 +209,7 @@ public class CustomerViewState extends ViewState {
         
         JetSettersButton logoutBtn = new JetSettersButton("Logout");
         logoutBtn.addActionListener(e -> {
+            inLState.clearStatus();
             ViewState.showState("Login");
         });
         buttonPanel.add(viewDetailsBtn);

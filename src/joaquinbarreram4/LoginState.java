@@ -107,7 +107,8 @@ class LoginState extends ViewState {
         loginPField = new JPasswordField(30);
         innerGbc.gridx = 1;
         formFields.add(loginPField, innerGbc);
-    
+        loginNameField.setText("");
+        loginPField.setText("");
         // Button Panel
         JPanel buttonPane = new JPanel();
         buttonPane.setBackground(new Color(19, 46, 50));
@@ -130,6 +131,7 @@ class LoginState extends ViewState {
             loginNameField.setText("");
             loginPField.setText("");
             System.out.println("Register popping off!");
+            clearStatus();
             createRegristrationPanel();
         });
         guestBtn.addActionListener(e -> {
@@ -154,12 +156,19 @@ class LoginState extends ViewState {
             } else{
                 status.setVisible(false);
             }
+                loginNameField.setText("");
+                loginPField.setText("");
         });
         // Add to contentPane with BorderLayout
         contentPane.add(formFields, BorderLayout.CENTER);
         contentPane.add(buttonPane, BorderLayout.SOUTH);
     }
     
+    public void clearStatus() {
+        status.setText(" ");
+        status.setVisible(false);
+        isValid = false;
+    }
     private void createRegristrationPanel() {
         registrationPanel = new JPanel(new GridBagLayout());
         registrationPanel.setBackground(new Color(45, 81, 78));
@@ -607,6 +616,8 @@ class LoginState extends ViewState {
             if (loggedInEmployee.isAManager) {
 //                System.out.println("ARRAY SIZE: " + Lodging.allLodgings.size());
 //                System.out.println("customers array size when manager logs in is: " + customers.size());
+                loginNameField.setText("");
+                loginPField.setText("");
                 EmployeeViewState eView = new EmployeeViewState(loggedInEmployee, this); // This is getting loginstate 
                 ViewState.addState("EmployeeView", eView);
                 ViewState.showState("EmployeeView");

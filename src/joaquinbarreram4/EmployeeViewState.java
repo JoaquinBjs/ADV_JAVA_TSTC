@@ -133,6 +133,7 @@ public final class EmployeeViewState extends ViewState {
         });
         logoutBtn.addActionListener(e -> {
             currEmployee = null;
+            inLState.clearStatus();
             ViewState.showState("Login");
         });
         exitBtn.addActionListener(e -> {
@@ -985,6 +986,10 @@ public final class EmployeeViewState extends ViewState {
                     } 
                    
                 }
+                    lodgeList.removeAllItems();
+                    for (Lodging l : Lodging.allLodgings) {
+                        lodgeList.addItem(l.name);
+                    }
             } catch (NumberFormatException ex) {
                 statusLabel.setText("Field is either empty or invalid");
                 bottomP.setVisible(true);

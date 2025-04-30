@@ -3,6 +3,7 @@ package joaquinbarreram5;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.*;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -44,6 +45,7 @@ class LoginState extends ViewState {
     // Create a login form method
     public void loginFormPanel(){
         load();
+        
         loginFormPanel = new JPanel(new GridBagLayout());
         loginFormPanel.setBackground(new Color(19, 46, 50));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -465,8 +467,9 @@ class LoginState extends ViewState {
     
     public boolean signUp(String username, String password) {
         // check if username exists
+//        System.out.println("USERNAME: " + username + "\n PASSWORD: " + password);
         boolean nameExists = false;
-        try (BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram4/customerAccounts.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram5/customerAccounts.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] lineData = line.split(",");
@@ -495,13 +498,13 @@ class LoginState extends ViewState {
     
         Customer newCustomer = new Customer(
             inName,
-            inPassword,
+            encryptPassword(inPassword),
             newId,
             0.0,
             inName,
             "Unknown"
         );
-    
+//        System.out.println("ENCRYPTED PASSWORD: " + newCustomer.getPassword());
         customers.add(newCustomer);
         save(); // assumed to encrypt and save to file
     
@@ -510,92 +513,29 @@ class LoginState extends ViewState {
     
     // Return the customer thst mstches if the, inputed name and password matches
     public Customer cMatches() {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram4/customerAccounts.txt"));
-            String line;
-        
-            while ((line = reader.readLine()) != null) {
-//                System.out.println("Popping off in cMatches while loop"); testing
-                // Splits the line the loop is on into 8 parts, and puts it into a array
-                String[] employeeData = line.split(",");
-
-                if (employeeData.length >= 6) { // Ensure we have all 6 attributes in the array
-                    String username = employeeData[0];
-                    String password = decryptPassword(employeeData[1]);
-//                    System.out.println("NAME: " + employeeData[0]); testing
-//                    System.out.println("Popping off in cMatches if statement"); testing
-                    // If the username and password is equal, continue recreating the objecr, if not, move to the next line, and check if that password and username is equal
-                    if (inName.equals(username) && inPassword.equals(password)) {
-
-                        // recreate object
-                        int id = Integer.parseInt(employeeData[2]);
-                        double balanceOwed = Double.parseDouble(employeeData[3]);
-                        String name = employeeData[4];
-                        String address = employeeData[5];
-//                        System.out.println(String.format("\n%s,%s,%d,%.2f,%s,%s", username, password,id, balanceOwed, name, address));
-                        return new Customer(
-                            username,
-                            password,
-                            id,
-                            balanceOwed,
-                            name,
-                            address
-                        );
-                    }
-                }
+        for (Customer c : customers) {
+            String decrypted = decryptPassword(c.getPassword());
+//            System.out.println("USERNAME: " + c.getUsername() + "\n PASSWORD: " + decrypted);
+            if (inName.equals(c.getUsername()) && inPassword.equals(decrypted)) {
+                return c;
             }
-            reader.close();
-        } catch (IOException ex) {
-            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
     
     // Return the employee thst mstches if the, inputed name and password matches
     public TravelAgencyEmployee eOMatches() {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram4/employeeAccounts.txt"));
-            String line;
-        
-            while ((line = reader.readLine()) != null) {
-                // Splits the line the loop is on into 8 parts, and puts it into a array
-                String[] employeeData = line.split(",");
-                if (employeeData.length >= 8) { // Ensure we have all 8 attributes in the array
-                    String username = employeeData[0];
-                    String password = decryptPassword(employeeData[1]);
-//                    System.out.println("USERNAME: " + username + " | PASSWORD: " + password);
-                    // If the username and password is equal, continue recreating the objecr, if not, move to the next line, and check if that password and username is equal
-                    if (inName.equals(username) && inPassword.equals(password)) {
-                        // recreate object
-                        int id = Integer.parseInt(employeeData[2]);
-                        boolean isManager = Boolean.parseBoolean(employeeData[3]);
-                        double salary = Double.parseDouble(employeeData[4].replace("$", ""));
-                        String workNumber = employeeData[5];
-                        String name = employeeData[6];
-                        String address = employeeData[7];
-//                        System.out.println(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",username, password, id, isManager, salary, workNumber, name, address)); // testing
-                        return new TravelAgencyEmployee(
-                            username,
-                            password,
-                            id,
-                            isManager,
-                            salary, 
-                            workNumber,
-                            name,
-                            address
-                        );
-                    }
-                }
+        for (TravelAgencyEmployee emp : employees) {
+            String decrypted = decryptPassword(emp.getPassword());
+            if (inName.equals(emp.getLoginName()) && inPassword.equals(decrypted)) {
+                return emp;
             }
-            reader.close();
-        } catch (IOException ex) {
-            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
         }
-        // If no match is found
-        return null; 
+        return null;
     }
     
     public void login() {
+        isValid = false;
 //        System.out.println("Enter username: ");
         inName = loginNameField.getText().trim();
 //        System.out.println(String.format("Name: %s", inName));
@@ -612,6 +552,7 @@ class LoginState extends ViewState {
 //        }
 
         if (loggedInEmployee != null) {
+            isValid = true;
             System.out.println("Login successful!");
             if (loggedInEmployee.isAManager) {
 //                System.out.println("ARRAY SIZE: " + Lodging.allLodgings.size());
@@ -631,6 +572,7 @@ class LoginState extends ViewState {
                 
             }
         } else if (loggedInCustomer != null) { // If not an employee, check customers
+            isValid = true;
             System.out.println("Login successful!");
             CustomerViewState cView = new CustomerViewState(loggedInCustomer, this);
             ViewState.addState("CustomerView", cView);    // adds to the right layout
@@ -660,52 +602,131 @@ class LoginState extends ViewState {
     }
     @Override
     public void save() {
-        try {
-            // Save customers to file
-            BufferedWriter customerWriter = new BufferedWriter(new FileWriter("src/joaquinbarreram4/customerAccounts.txt"));
-            for (int i = 0; i < customers.size(); i++) {
-                Customer customer = customers.get(i);
-                customerWriter.write(String.format("%s,%s,%d,%.2f,%s,%s",
+        if (ViewState.con == null){
+            try {
+                // Save customers to file
+                BufferedWriter customerWriter = new BufferedWriter(new FileWriter("src/joaquinbarreram5/customerAccounts.txt"));
+                for (int i = 0; i < customers.size(); i++) {
+                    Customer customer = customers.get(i);
+                    customerWriter.write(String.format("%s,%s,%d,%.2f,%s,%s",
+                            customer.getUsername(),
+                            customer.getPassword(),
+                            customer.id,
+                            customer.balanceOwed,
+                            customer.name,
+                            customer.address
+                    ));
+                    
+                    // Add newline for all entries except the last one
+                    if (i < customers.size() - 1) {
+                        customerWriter.write("\n");
+                    }
+                }
+                customerWriter.close();
+                
+                // Save employees to file
+                BufferedWriter employeeWriter = new BufferedWriter(new FileWriter("src/joaquinbarreram5/employeeAccounts.txt"));
+                for (int i = 0; i < employees.size(); i++) {
+                    TravelAgencyEmployee employee = employees.get(i);
+                    employeeWriter.write(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",
+                            employee.getLoginName(),
+                            encryptPassword(employee.getPassword()),
+                            employee.id,
+                            employee.isAManager,
+                            employee.salary,
+                            employee.workNumber,
+                            employee.name,
+                            employee.address
+                    ));
+                    
+                    // Add newline for all entries except the last one
+                    if (i < employees.size() - 1) {
+                        employeeWriter.write("\n");
+                    }
+                }
+                employeeWriter.close();
+                System.out.println("Data saved successfully!");
+            } catch (IOException ex) {
+                Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Error saving data: " + ex.getMessage());
+            }
+        } else{
+            // Save customers to database
+            try {
+                String sqlCust = 
+                    "INSERT INTO customerAccount "
+                  + "(username, password, customerId, balanceOwed, name, address) "
+                  + "VALUES (?, ?, ?, ?, ?, ?) "
+                  + "ON DUPLICATE KEY UPDATE "
+                  + "password = ?, balanceOwed = ?, name = ?, address = ?";
+                try (PreparedStatement ps = ViewState.con.prepareStatement(sqlCust)) {
+                    for (Customer c : customers) {
+                        ps.setString(1, c.getUsername());
+                        ps.setString(2, c.getPassword());
+//                        ps.setString(2, encryptPassword(c.getPassword()));
+                        ps.setInt   (3, c.id);
+                        ps.setDouble(4, c.balanceOwed);
+                        ps.setString(5, c.name);
+                        ps.setString(6, c.address);
+                        ps.setString(7,c.getPassword());
+//                        ps.setString(7, encryptPassword(c.getPassword()));
+                        ps.setDouble(8, c.balanceOwed);
+                        ps.setString(9, c.name);
+                        ps.setString(10, c.address);
+                        ps.executeUpdate();
+                    }
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(LoginState.class.getName())
+                      .log(Level.SEVERE, null, ex);
+            }
+            // save to file
+            try {
+                // Save customers to file
+                BufferedWriter customerWriter = new BufferedWriter(
+                    new FileWriter("src/joaquinbarreram5/customerAccounts.txt"));
+                for (int i = 0; i < customers.size(); i++) {
+                    Customer customer = customers.get(i);
+                    customerWriter.write(String.format("%s,%s,%d,%.2f,%s,%s",
                         customer.getUsername(),
                         encryptPassword(customer.getPassword()),
                         customer.id,
                         customer.balanceOwed,
                         customer.name,
                         customer.address
-                ));
-                
-                // Add newline for all entries except the last one
-                if (i < customers.size() - 1) {
-                    customerWriter.write("\n");
+                    ));
+                    if (i < customers.size() - 1) {
+                        customerWriter.newLine();
+                    }
                 }
-            }
-            customerWriter.close();
-            
-            // Save employees to file
-            BufferedWriter employeeWriter = new BufferedWriter(new FileWriter("src/joaquinbarreram4/employeeAccounts.txt"));
-            for (int i = 0; i < employees.size(); i++) {
-                TravelAgencyEmployee employee = employees.get(i);
-                employeeWriter.write(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",
+                customerWriter.close();
+    
+                // Save employees to file
+                BufferedWriter employeeWriter = new BufferedWriter(
+                    new FileWriter("src/joaquinbarreram5/employeeAccounts.txt"));
+                for (int i = 0; i < employees.size(); i++) {
+                    TravelAgencyEmployee employee = employees.get(i);
+                    employeeWriter.write(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",
                         employee.getLoginName(),
-                        encryptPassword(employee.getPassword()),
+                        employee.getPassword(),
                         employee.id,
                         employee.isAManager,
                         employee.salary,
                         employee.workNumber,
                         employee.name,
                         employee.address
-                ));
-                
-                // Add newline for all entries except the last one
-                if (i < employees.size() - 1) {
-                    employeeWriter.write("\n");
+                    ));
+                    if (i < employees.size() - 1) {
+                        employeeWriter.newLine();
+                    }
                 }
+                employeeWriter.close();
+    
+                System.out.println("Data backed up to files and saved to database!");
+            } catch (IOException ex) {
+                Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Error backing up data: " + ex.getMessage());
             }
-            employeeWriter.close();
-            System.out.println("Data saved successfully!");
-        } catch (IOException ex) {
-            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("Error saving data: " + ex.getMessage());
         }
     }
     
@@ -715,188 +736,229 @@ class LoginState extends ViewState {
         customers.clear();
         employees.clear();
 //        System.out.println("ARRAY LIST SIZE IN LOAD: " + Lodging.allLodgings.size());
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram4/employeeAccounts.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                count++;
-            }
-            reader.close();
-        } catch (IOException ex) {
-            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram4/lodgingInfo.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lCount++;
-            }
-            reader.close();
-        } catch (IOException ex) {
-            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        // only creates the manager and employee loging if the file is empty
-        if (count < 1){
+        if (ViewState.con == null){
             try {
-//                System.out.println("POPPING OFF!");
-                // Saves manager and employee account to accounts
-                BufferedWriter writer = new BufferedWriter(new FileWriter("src/joaquinbarreram4/employeeAccounts.txt", true));
-                TravelAgencyEmployee emp = new TravelAgencyEmployee(
-                        "Employee",
-                        encryptPassword("password"), 
-                        1,
-                        false,
-                        50000, 
-                        "123-456-7890", 
-                        "Jane Doe", 
-                        "Company Address"
-                );
-                writer.write(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",
-                        emp.getLoginName(), emp.getPassword(),emp.id,emp.isAManager, emp.salary, emp.workNumber, emp.name, emp.address));
-            
-                TravelAgencyEmployee mgr = new TravelAgencyEmployee(
-                        "Manager",
-                        encryptPassword("password"),
-                        2,
-                        true,
-                        50000,
-                        "123-456-7890",
-                        "John Doe",
-                        "Company Address"
-                );
-                writer.write(String.format("\n%s,%s,%d,%b,$%.2f,%s,%s,%s",
-                         mgr.getLoginName(), mgr.getPassword(),mgr.id, mgr.isAManager, mgr.salary, mgr.workNumber, mgr.name, mgr.address));            
-                writer.close();
+                BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram5/employeeAccounts.txt"));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    count++;
+                }
+                reader.close();
             } catch (IOException ex) {
-                System.out.println("ERROR: " + ex);
                 Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }  
-        if (lCount < 1){
-        // Adds the lodges and houses to the lodgING text file
-        try {
-        //    System.out.println("POPPING OFF!");
-        
-            // Write to file and add to lodging array
-            BufferedWriter writer = new BufferedWriter(new FileWriter("src\\joaquinbarreram4\\lodgingInfo.txt"));
-            writer.write(String.format("%s,%d,%d,%.2f,%d",
-                    "4 seasons",
-                    20,
-                    83,
-                    9.0,
-                    12
-            ));
             
-            
-            // Write to file and add to array
-            writer.write(String.format("\n%s,%d,%d,%.2f,%d",
-                    "956 Hotel",
-                    67,
-                    12,
-                    37.2,
-                    5
-            ));
-            
-            
-            // Write to file and add to array
-            writer.write(String.format("\n%s,%.2f,%d", 
-                    "Blue House",
-                    12.1,
-                    812
-            ));
-            
-            
-            // Write to file and add to array
-            writer.write(String.format("\n%s,%.2f,%d", 
-                    "Mansion",
-                    21.23,
-                    3
-            ));
-            
-            
-            // Write to file and add to array
-            writer.write(String.format("\n%s,%.2f,%d", 
-                    "Big Home",
-                    10.61,
-                    2
-            ));
-//            Lodging.allLodgings.add(new Home("Big Home", 10.61, 2));
-        // Adds the default lodges into array if the array is empty
-        if (Lodging.allLodgings.size() < 1){
-            Lodging.allLodgings.add(new Hotel("4 seasons", 20, 83, 9.0, 12));
-            Lodging.allLodgings.add(new Hotel("956 Hotel", 67, 12, 37.2, 5));
-            Lodging.allLodgings.add(new Home("Blue House", 12.1, 812));
-            Lodging.allLodgings.add(new Home("Mansion", 21.23, 3));
-            Lodging.allLodgings.add(new Home("Big Home", 10.61, 2));
-//            System.out.println("RUNNING IN IF STATEMENT IN LOGINSTATE ARRAY SIZE LODGE: " + Lodging.allLodgings.size());
-        }
-            writer.close();
-        } catch (IOException ex) {
-            System.out.println("NOT POPPING OFF");
-            Logger.getLogger(Lodging.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        }
-        
-
-        try {
-            // Load customers from file
-            BufferedReader customerReader = new BufferedReader(new FileReader("src/joaquinbarreram4/customerAccounts.txt"));
-            String line;
-            
-            while ((line = customerReader.readLine()) != null) {
-                String[] customerData = line.split(",");
-                if (customerData.length >= 6) {
-                    String username = customerData[0];
-                    String password = decryptPassword(customerData[1]);
-                    int id = Integer.parseInt(customerData[2]);
-                    double balanceOwed = Double.parseDouble(customerData[3]);
-                    String name = customerData[4];
-                    String address = customerData[5];
-                    
-                    customers.add(new Customer(
-                        username,
-                        password,
-                        id,
-                        balanceOwed,
-                        name,
-                        address
-                    ));
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader("src/joaquinbarreram5/lodgingInfo.txt"));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    lCount++;
                 }
+                reader.close();
+            } catch (IOException ex) {
+                Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
             }
-            customerReader.close();
-            
-            // Load employees from file
-            BufferedReader employeeReader = new BufferedReader(new FileReader("src/joaquinbarreram4/employeeAccounts.txt"));
-            
-            while ((line = employeeReader.readLine()) != null) {
-                String[] employeeData = line.split(",");
-                if (employeeData.length >= 8) {
-                    String loginName = employeeData[0];
-                    String password = decryptPassword(employeeData[1]);
-                    int id = Integer.parseInt(employeeData[2]);
-                    boolean isManager = Boolean.parseBoolean(employeeData[3]);
-                    double salary = Double.parseDouble(employeeData[4].replace("$", ""));
-                    String workNumber = employeeData[5];
-                    String name = employeeData[6];
-                    String address = employeeData[7];
-                    
-                    employees.add(new TravelAgencyEmployee(
-                        loginName,
-                        password,
-                        id,
-                        isManager,
-                        salary,
-                        workNumber,
-                        name,
-                        address
-                    ));
+            // only creates the manager and employee loging if the file is empty
+            if (count < 1){
+                try {
+//                    System.out.println("POPPING OFF!");
+                    // Saves manager and employee account to accounts
+                    BufferedWriter writer = new BufferedWriter(new FileWriter("src/joaquinbarreram5/employeeAccounts.txt", true));
+                    TravelAgencyEmployee emp = new TravelAgencyEmployee(
+                            "Employee",
+                            encryptPassword("password"), 
+                            1,
+                            false,
+                            50000, 
+                            "123-456-7890", 
+                            "Jane Doe", 
+                            "Company Address"
+                    );
+                    writer.write(String.format("%s,%s,%d,%b,$%.2f,%s,%s,%s",
+                            emp.getLoginName(), emp.getPassword(),emp.id,emp.isAManager, emp.salary, emp.workNumber, emp.name, emp.address));
+                
+                    TravelAgencyEmployee mgr = new TravelAgencyEmployee(
+                            "Manager",
+                            encryptPassword("password"),
+                            2,
+                            true,
+                            50000,
+                            "123-456-7890",
+                            "John Doe",
+                            "Company Address"
+                    );
+                    writer.write(String.format("\n%s,%s,%d,%b,$%.2f,%s,%s,%s",
+                             mgr.getLoginName(), mgr.getPassword(),mgr.id, mgr.isAManager, mgr.salary, mgr.workNumber, mgr.name, mgr.address));            
+                    writer.close();
+                } catch (IOException ex) {
+                    System.out.println("ERROR: " + ex);
+                    Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
                 }
+            }  
+            if (lCount < 1){
+            // Adds the lodges and houses to the lodgING text file
+            try {
+            //    System.out.println("POPPING OFF!");
+            
+                // Write to file and add to lodging array
+                BufferedWriter writer = new BufferedWriter(new FileWriter("src\\joaquinbarreram5\\lodgingInfo.txt"));
+                writer.write(String.format("%s,%d,%d,%.2f,%d",
+                        "4 seasons",
+                        20,
+                        83,
+                        9.0,
+                        12
+                ));
+                
+                
+                // Write to file and add to array
+                writer.write(String.format("\n%s,%d,%d,%.2f,%d",
+                        "956 Hotel",
+                        67,
+                        12,
+                        37.2,
+                        5
+                ));
+                
+                
+                // Write to file and add to array
+                writer.write(String.format("\n%s,%.2f,%d", 
+                        "Blue House",
+                        12.1,
+                        812
+                ));
+                
+                
+                // Write to file and add to array
+                writer.write(String.format("\n%s,%.2f,%d", 
+                        "Mansion",
+                        21.23,
+                        3
+                ));
+                
+                
+                // Write to file and add to array
+                writer.write(String.format("\n%s,%.2f,%d", 
+                        "Big Home",
+                        10.61,
+                        2
+                ));
+//                Lodging.allLodgings.add(new Home("Big Home", 10.61, 2));
+            // Adds the default lodges into array if the array is empty
+            if (Lodging.allLodgings.size() < 1){
+                Lodging.allLodgings.add(new Hotel("4 seasons", 20, 83, 9.0, 12));
+                Lodging.allLodgings.add(new Hotel("956 Hotel", 67, 12, 37.2, 5));
+                Lodging.allLodgings.add(new Home("Blue House", 12.1, 812));
+                Lodging.allLodgings.add(new Home("Mansion", 21.23, 3));
+                Lodging.allLodgings.add(new Home("Big Home", 10.61, 2));
+//                System.out.println("RUNNING IN IF STATEMENT IN LOGINSTATE ARRAY SIZE LODGE: " + Lodging.allLodgings.size());
             }
-            employeeReader.close();
-//            System.out.println("Data loaded successfully!");
-        } catch (IOException ex) {
-            Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("Error loading data: " + ex.getMessage());
+                writer.close();
+            } catch (IOException ex) {
+                System.out.println("NOT POPPING OFF");
+                Logger.getLogger(Lodging.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            }
+            
+    
+            try {
+                // Load customers from file
+                BufferedReader customerReader = new BufferedReader(new FileReader("src/joaquinbarreram5/customerAccounts.txt"));
+                String line;
+                
+                while ((line = customerReader.readLine()) != null) {
+                    String[] customerData = line.split(",");
+                    if (customerData.length >= 6) {
+                        String username = customerData[0];
+                        String password = customerData[1];
+                        int id = Integer.parseInt(customerData[2]);
+                        double balanceOwed = Double.parseDouble(customerData[3]);
+                        String name = customerData[4];
+                        String address = customerData[5];
+                        
+                        customers.add(new Customer(
+                            username,
+                            password,
+                            id,
+                            balanceOwed,
+                            name,
+                            address
+                        ));
+                    }
+                }
+                customerReader.close();
+                
+                // Load employees from file
+                BufferedReader employeeReader = new BufferedReader(new FileReader("src/joaquinbarreram5/employeeAccounts.txt"));
+                
+                while ((line = employeeReader.readLine()) != null) {
+                    String[] employeeData = line.split(",");
+                    if (employeeData.length >= 8) {
+                        String loginName = employeeData[0];
+                        String password = employeeData[1];
+                        int id = Integer.parseInt(employeeData[2]);
+                        boolean isManager = Boolean.parseBoolean(employeeData[3]);
+                        double salary = Double.parseDouble(employeeData[4].replace("$", ""));
+                        String workNumber = employeeData[5];
+                        String name = employeeData[6];
+                        String address = employeeData[7];
+                        
+                        employees.add(new TravelAgencyEmployee(
+                            loginName,
+                            password,
+                            id,
+                            isManager,
+                            salary,
+                            workNumber,
+                            name,
+                            address
+                        ));
+                    }
+                }
+                employeeReader.close();
+//                System.out.println("Data loaded successfully!");
+            } catch (IOException ex) {
+                Logger.getLogger(LoginState.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Error loading data: " + ex.getMessage());
+            }
+        } else {
+            try{
+                if(ViewState.con != null){
+                    try(Statement stmt = ViewState.con.createStatement();
+                            ResultSet r = stmt.executeQuery("SELECT * FROM EmployeeAccount")){
+                        while(r.next()){
+                            TravelAgencyEmployee emp = new TravelAgencyEmployee(
+                                    r.getString("username"),
+                                    r.getString("password"),
+                                    r.getInt("empId"),
+                                    r.getBoolean("isManager"),
+                                    r.getDouble("salary"),
+                                    r.getString("workNumber"),
+                                    r.getString("name"),
+                                    r.getString("address")
+                            );
+                            employees.add(emp);
+                        }
+                    }
+                    try(Statement stmt = ViewState.con.createStatement();
+                            ResultSet r = stmt.executeQuery("SELECT * FROM customerAccount")){
+                        while(r.next()){
+                            Customer cmr = new Customer(
+                                    r.getString("username"),
+                                    r.getString("password"),
+                                    r.getInt("customerId"),
+                                    r.getDouble("balanceOwed"),
+                                    r.getString("name"),
+                                    r.getString("address")
+                            );
+                            customers.add(cmr);
+                        }
+                    }
+                    save();
+                }
+            } catch (SQLException e){
+                System.out.println("LINE 1080\n" + e);
+            }
         }
     }
     
@@ -905,4 +967,3 @@ class LoginState extends ViewState {
         return panel;
     }
 }
-

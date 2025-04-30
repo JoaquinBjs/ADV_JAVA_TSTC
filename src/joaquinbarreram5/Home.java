@@ -23,7 +23,7 @@ import java.util.logging.Logger;
     @Override
     public void registerLodging() {
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("src\\joaquinbarreram4\\lodgingInfo.txt", true));
+            BufferedWriter writer = new BufferedWriter(new FileWriter("src\\joaquinbarreram5\\lodgingInfo.txt", true));
             writer.write(String.format("\n%s,%.2f,%d", name, cost, numberOfBedrooms));
             writer.close();
         } catch (IOException ex) {

@@ -7,6 +7,7 @@ abstract class Lodging {
     int maxOccupants;
     String name;
     public static ArrayList<Lodging> allLodgings = new ArrayList<>();
+    
     // Default Cnstructor
     public Lodging (){
         this.numberOfBedrooms = 0;
@@ -56,5 +57,7 @@ abstract class Lodging {
     
     abstract void displayDetails();
     abstract String getDetailsString();
+    
+    // M5 
 
 }

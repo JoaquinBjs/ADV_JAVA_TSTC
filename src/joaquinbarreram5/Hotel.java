@@ -21,14 +21,13 @@ class Hotel extends Lodging {
     }
      @Override
     public void registerLodging() {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("src\\joaquinbarreram4\\lodgingInfo.txt", true));
-            writer.write(String.format("\n%s,%d,%d,%.2f%n", name, vacancies, numberOfBedrooms, basePricePerNight));
-            writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(Hotel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter("src\\joaquinbarreram5\\lodgingInfo.txt", true));
+                writer.write(String.format("\n%s,%d,%d,%.2f%n", name, vacancies, numberOfBedrooms, basePricePerNight));
+                writer.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Hotel.class.getName()).log(Level.SEVERE, null, ex);
+            }
     }   
     
     @Override

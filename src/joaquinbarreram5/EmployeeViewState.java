@@ -1,6 +1,8 @@
 package joaquinbarreram5;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.sql.PreparedStatement;
@@ -11,6 +13,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 
 public final class EmployeeViewState extends ViewState {
@@ -32,7 +35,6 @@ public final class EmployeeViewState extends ViewState {
     private JTextField hotelVacanciesField;
     private JTextField hotelMaxOccField;
     private JTextField hotelNameField;
-    
     private JComboBox<String> lodgeList;
     private JPanel panel;
     private JPanel mainMenuPanel = new JPanel();
@@ -63,6 +65,8 @@ public final class EmployeeViewState extends ViewState {
         hotelImages.clear();
         uploadImageBtn.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG & JPG Images", "jpg", "png");
+            chooser.setFileFilter(filter);
             chooser.setMultiSelectionEnabled(true);
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             int result = chooser.showOpenDialog(panel);
@@ -73,7 +77,7 @@ public final class EmployeeViewState extends ViewState {
                 Map<String,java.util.List<String>> target = getCurrentImageMap();
                 target.computeIfAbsent(selectedName, k -> new ArrayList<>());
                 for (File f : files) target.get(selectedName).add(f.getAbsolutePath());
-                // now push them into your DB:
+                // pushes the image to DB
                 uploadImages();
             }
         });
@@ -266,9 +270,9 @@ public final class EmployeeViewState extends ViewState {
         
         // Event listener
         lodgeList.addActionListener(e -> {
-            int idx = lodgeList.getSelectedIndex();
-            if (idx >= 0 && idx < Lodging.allLodgings.size()) {
-                Lodging sel = Lodging.allLodgings.get(idx);
+            int id = lodgeList.getSelectedIndex();
+            if (id >= 0 && id < Lodging.allLodgings.size()) {
+                Lodging sel = Lodging.allLodgings.get(id);
                 lodgeDetails.setText(sel.getDetailsString());
                 lodgeDetails.setCaretPosition(0);
                 addLodgeImage(sel);
@@ -1403,11 +1407,10 @@ public final class EmployeeViewState extends ViewState {
     private void addLodgeImage(Lodging lodge){
         thumbnailPanel.removeAll();
 //        System.out.println(lodgeIdMap.get(lodge));
-        
         try {
             if(ViewState.con != null && !ViewState.con.isClosed()){
                 Integer lodgeId = lodgeIdMap.get(lodge);
-                System.out.println("LODGE ID: " + lodgeId);
+//                System.out.println("LODGE ID: " + lodgeId);
                 if (lodgeId != null){
                     String table = lodgeTypeTable(lodge);
                     String column = lodgeTypeColumn(lodge);
@@ -1415,8 +1418,8 @@ public final class EmployeeViewState extends ViewState {
                             "SELECT image FROM " + table
                                     + " WHERE "
                                     + column + " = ?");
-                    ps.setInt(1, lodgeId);                    
-                    System.out.println(ps);
+                    ps.setInt(1, lodgeId);
+//                    System.out.println(ps);
 //                    ps.setInt(1, lodgeId);
 //                    int i = 0;
                     var rs = ps.executeQuery();
@@ -1431,7 +1434,21 @@ public final class EmployeeViewState extends ViewState {
 
                             if(img != null){
 //                                System.out.println(img);
+                                    
+                                Image scaled = img.getScaledInstance(720, 1280, 0);
+
+
                                 JLabel pic = new JLabel(new ImageIcon(img));
+                                pic.addMouseListener(new MouseAdapter(){
+                                    boolean toggle = false;
+                                    @Override
+                                    public void mouseClicked(MouseEvent e){
+                                        pic.setIcon(new ImageIcon(toggle ? scaled : img));
+                                        toggle = !toggle;
+                                        thumbnailPanel.revalidate();
+                                        thumbnailPanel.repaint();
+                                    }
+                                });
                                 thumbnailPanel.add(pic);
 //                                System.out.println("test: " + img);
                                 
